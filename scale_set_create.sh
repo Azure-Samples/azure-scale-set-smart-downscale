@@ -37,15 +37,18 @@ az storage account create -n $AZURE_SA_NAME -l $AZURE_DC_LOCATION -g $AZURE_RG_N
 
 # Create SAS token expiry date +1 year to current datetime
 export AZURE_SA_SAS_EXPIRY_DATE=`date -d "1 year" '+%Y-%m-%dT%H:%MZ'`
+# Get Azure SA Key
+export AZURE_SA_KEY=`az storage account keys list -n $AZURE_SA_NAME -g $AZURE_RG_NAME --query [0].value --output tsv`
 # Get SAS token
-export AZURE_SA_SAS_TOKEN=`az storage account generate-sas --permissions cdlruwap --account-name $AZURE_SA_NAME --services t --resource-types sco --expiry $AZURE_SA_SAS_EXPIRY_DATE --output tsv`
+export AZURE_SA_SAS_TOKEN=`az storage account generate-sas --permissions cdlruwap --account-name $AZURE_SA_NAME --account-key $AZURE_SA_KEY --services bfqt --resource-types sco --expiry $AZURE_SA_SAS_EXPIRY_DATE --output tsv`
 
 export AZURE_SCALESET_ID=`az vmss list --resource-group $AZURE_RG_NAME  --query [0].id --output tsv`
 
 
 # Replace placeholders with actual values in secret files
 sed -i "s/StorageName/$AZURE_SA_NAME/g" storage_secret.json
-sed -i 's@StorageSASToken@'$AZURE_SA_SAS_TOKEN'@' storage_secret.json
+#sed -i 's@StorageSASToken@'$AZURE_SA_SAS_TOKEN'@' storage_secret.json
+sed -i "s/StorageSASToken/$(echo $AZURE_SA_SAS_TOKEN | sed -e 's/\\/\\\\/g; s/\//\\\//g; s/&/\\\&/g')/g" storage_secret.json
 
 sed -i "s/TRStorageName/$AZURE_SA_NAME/g" metrics_config.json
 sed -i 's@TRResourceID@'$AZURE_SCALESET_ID'@' metrics_config.json
