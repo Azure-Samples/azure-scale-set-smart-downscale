@@ -7,7 +7,7 @@ export AZURE_DC_LOCATION=southcentralus
 # Azure VM Scale Set name
 export AZURE_SCALESET_NAME=smart-scale-set	
 # Azure VM Scale Set LB
-export AZURE_SCALESET_NAME=smart-scale-set-lb
+export AZURE_SCALESET_LB=smart-scale-set-lb
 
 # Azure Scale Set VM URN or URI
 export AZURE_SCALESET_BASE_IMAGE=UbuntuLTS
@@ -28,6 +28,7 @@ az group create --name $AZURE_RG_NAME --location $AZURE_DC_LOCATION
 az vmss create -n $AZURE_SCALESET_NAME -g $AZURE_RG_NAME \
             --image $AZURE_SCALESET_BASE_IMAGE \
             --vm-sku $AZURE_SCALESET_VM_SKU \
+            --load-balancer $AZURE_SCALESET_LB --lb-sku=Basic \
             --generate-ssh-keys
 
 
@@ -38,3 +39,21 @@ az storage account create -n $AZURE_SA_NAME -l $AZURE_DC_LOCATION -g $AZURE_RG_N
 export AZURE_SA_SAS_EXPIRY_DATE=`date -d "1 year" '+%Y-%m-%dT%H:%MZ'`
 # Get SAS token
 export AZURE_SA_SAS_TOKEN=`az storage account generate-sas --permissions cdlruwap --account-name $AZURE_SA_NAME --services t --resource-types sco --expiry $AZURE_SA_SAS_EXPIRY_DATE`
+
+export AZURE_SCALESET_ID=`az vmss list --resource-group $AZURE_RG_NAME  --query [0].id --output tsv`
+
+
+# Replace placeholders with actual values in secret files
+sed -i "s/StorageName/$AZURE_SA_NAME/g" storage_secret.json
+sed -i "s/StorageSASToken/$AZURE_SA_SAS_TOKEN/g" storage_secret.json
+
+sed -i "s/TRStorageName/$AZURE_SA_NAME/g" metrics_config.json
+sed -i "s/TRResourceID/$AZURE_SCALESET_ID/g" metrics_config.json
+
+
+# Add metrics as sepcified in metrics_config.json to scale set
+az vmss diagnostics set --resource-group $AZURE_RG_NAME \
+                        --vmss-name $AZURE_SCALESET_NAME \
+                        --settings  metrics_config.json \
+                        --protected-settings storage_secret.json
+

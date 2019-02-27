@@ -1,5 +1,5 @@
 {
-    "StorageAccount": "turborenderstorage",
+    "StorageAccount": "TRStorageName",
     "ladCfg": {
       "diagnosticMonitorConfiguration": {
         "eventVolume": "Medium",
@@ -9,7 +9,7 @@
               "scheduledTransferPeriod": "PT1M"
             }
           ],
-          "resourceId": "/subscriptions/3c5814b6-2535-4425-a242-9a3bd1718f29/resourceGroups/turbotest/providers/Microsoft.Compute/virtualMachineScaleSets/turboset"
+          "resourceId": "TRResourceID"
         },
         "performanceCounters": {
           "performanceCounterConfiguration": [
