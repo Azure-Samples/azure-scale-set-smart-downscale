@@ -18,8 +18,6 @@ export AZURE_SCALESET_VM_SKU=Standard_B1s
 # Azure Storage Account name for the metrics collection usage
 export AZURE_SA_NAME=metricsstorageaccount	
 # Azure Function Plan (AppService)
-export AZURE_FUNC_PLAN_NAME=ScaleDownPlan	
-# Azure Function Plan (AppService)
 export AZURE_FUNC_NAME=ScaleDown	
 
 
@@ -75,12 +73,8 @@ export AZURE_SA_CONNECTION_STRING=`az storage account show-connection-string  --
 
 FUNCTION_APP_SETTINGS="ScaleSetId=$AZURE_SCALESET_ID LookupTimeInMinutes=5 CPUTreshold=5 TablePrefix=WADMetricsPT1M StorageAccountConnectionString=$AZURE_SA_CONNECTION_STRING"
 
-
-# Create AppService plan for Function to use Env variables to config
-az appservice plan create --resource-group $AZURE_RG_NAME --location $AZURE_DC_LOCATION --name $AZURE_FUNC_PLAN_NAME
-
 # Create FunctionApp
-az functionapp create --name $AZURE_FUNC_NAME --resource-group $AZURE_RG_NAME  --storage-account $AZURE_SA_NAME --plan $AZURE_FUNC_PLAN_NAME
+az functionapp create --name $AZURE_FUNC_NAME --resource-group $AZURE_RG_NAME  --storage-account $AZURE_SA_NAME --consumption-plan-location $AZURE_DC_LOCATION
 
 # Add Env Variables to config Func
 az functionapp config appsettings set --settings $FUNCTION_APP_SETTINGS --name $AZURE_FUNC_NAME --resource-group $AZURE_RG_NAME
