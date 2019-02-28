@@ -1,4 +1,4 @@
-# Azure Resource Group name
+# Azure Subscription ID to deploy
 export AZURE_SUBSCRIPTION_ID=
 # Azure Resource Group name
 export AZURE_RG_NAME=smart-scale-set-rg			 
