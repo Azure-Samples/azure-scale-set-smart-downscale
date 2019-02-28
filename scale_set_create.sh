@@ -42,7 +42,7 @@ az vmss create -n $AZURE_SCALESET_NAME -g $AZURE_RG_NAME \
 
 
 # Create Azure Storage Account
-az storage account create -n $AZURE_SA_NAME -l $AZURE_DC_LOCATION -g $AZURE_RG_NAME --sku Standard_LRS
+az storage account create --name $AZURE_SA_NAME --location $AZURE_DC_LOCATION --resource-group $AZURE_RG_NAME --sku Standard_LRS
 
 # Create SAS token expiry date +1 year to current datetime
 # Wrong doc -- the format of datetime is '+%Y-%m-%dT%H:%M:00Z'
@@ -80,7 +80,7 @@ FUNCTION_APP_SETTINGS="ScaleSetId=$AZURE_SCALESET_ID LookupTimeInMinutes=5 CPUTr
 az appservice plan create --resource-group $AZURE_RG_NAME --location $AZURE_DC_LOCATION --name $AZURE_FUNC_PLAN_NAME
 
 # Create FunctionApp
-az functionapp create --name $AZURE_FUNC_NAME  --resource-group $AZURE_RG_NAME  --storage-account $AZURE_SA_NAME --plan $AZURE_FUNC_PLAN_NAME
+az functionapp create --name $AZURE_FUNC_NAME --resource-group $AZURE_RG_NAME  --storage-account $AZURE_SA_NAME --plan $AZURE_FUNC_PLAN_NAME
 
 # Add Env Variables to config Func
-az functionapp config appsettings set --settings $FUNCTION_APP_SETTINGS --name $AZURE_FUNC_NAME -g $AZURE_RG_NAME
+az functionapp config appsettings set --settings $FUNCTION_APP_SETTINGS --name $AZURE_FUNC_NAME --resource-group $AZURE_RG_NAME
