@@ -84,18 +84,25 @@ namespace httpTriggerAutoScale
 
         //Selecting intances that need to be killed based on low metrics
         private static List<string> GetInstancesToKill(List<WadMetric> Metrics, int CPUTreshold) {
-            List<string> instances;
+            List<string> instances = new List<string>();
 
-            //Calculate average by metric grouped by Host
-            var groupedResult = Metrics.GroupBy(t => new { Host = t.Host })
-                           .Select(g => new
-                           {
-                               Average = g.Average(p => p.Average),
-                               ID = g.Key.Host
-                           });
-            //select intances with less thenCPUTreshold
-            var ins=  groupedResult.Where(x => x.Average <= CPUTreshold);
-            instances = new List<string>(ins.Select(x=> x.ID));
+            if (Metrics != null)
+            {
+                if (Metrics.Count > 0)
+                {
+                    //Calculate average by metric grouped by Host
+                    var groupedResult = Metrics.GroupBy(t => new { Host = t.Host })
+                                   .Select(g => new
+                                   {
+                                       Average = g.Average(p => p.Average),
+                                       ID = g.Key.Host
+                                   });
+                    //select intances with less thenCPUTreshold
+                    var ins = groupedResult.Where(x => x.Average <= CPUTreshold);
+                    instances = new List<string>(ins.Select(x => x.ID));
+                }
+
+            }           
 
             return instances;
         } 
