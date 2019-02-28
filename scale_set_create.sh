@@ -19,7 +19,7 @@ export AZURE_SCALESET_VM_SKU=Standard_B1s
 # Azure Storage Account name for the metrics collection usage
 export AZURE_SA_NAME=metricsstorageaccount	
 # Azure FunctionApp Name
-export AZURE_FUNC_NAME=ScaleSetManager
+export AZURE_FUNC_NAME=ScaleSetManager$RANDOM
 
 # Parameters for FunctionApp
 export FUNC_PARAM_LOOKUP_TIME_IN_MINUTES=5
@@ -84,7 +84,7 @@ export FUNC_PARAM_TIME_OF_CREATION=`date '+%Y-%m-%dT%H:%M:00Z'`
 export AZURE_SA_CONNECTION_STRING=`az storage account show-connection-string  --name $AZURE_SA_NAME --resource-group $AZURE_RG_NAME --output tsv`
 
 # Build AppSettins for Function App
-export FUNCTION_APP_SETTINGS="ScaleSetId=$AZURE_SCALESET_ID LookupTimeInMinutes=$FUNC_PARAM_LOOKUP_TIME_IN_MINUTES CPUTreshold=$FUNC_PARAM_CPU_TRESHOLD TablePrefix=$FUNC_PARAM_TABLE_PREFIX StorageAccountConnectionString=$AZURE_SA_CONNECTION_STRING StartupDelayInMin=$FUNC_PARAM_STARTUP_DELAY_IN_MIN TimeOfCreation=$FUNC_PARAM_TIME_OF_CREATION"
+export FUNCTION_APP_SETTINGS="ScaleSetId=$AZURE_SCALESET_ID LookupTimeInMinutes=$FUNC_PARAM_LOOKUP_TIME_IN_MINUTES CPUTreshold=$FUNC_PARAM_CPU_TRESHOLD TablePrefix=$FUNC_PARAM_TABLE_PREFIX StorageAccountConnectionString=$AZURE_SA_CONNECTION_STRING StartupDelayInMin=$FUNC_PARAM_STARTUP_DELAY_IN_MIN TimeOfCreation=$FUNC_PARAM_TIME_OF_CREATION FUNCTIONS_EXTENSION_VERSION=~2 WEBSITE_RUN_FROM_PACKAGE=1"
 
 # Create FunctionApp
 az functionapp create --name $AZURE_FUNC_NAME --resource-group $AZURE_RG_NAME  --storage-account $AZURE_SA_NAME --consumption-plan-location $AZURE_DC_LOCATION
