@@ -18,10 +18,10 @@ export AZURE_SCALESET_BASE_IMAGE=UbuntuLTS
 export AZURE_SCALESET_VM_SKU=Standard_B1s
 # Azure Storage Account name for the metrics collection usage
 export AZURE_SA_NAME=metricsstorageaccount	
-# Azure Function Plan (AppService)
+# Azure FunctionApp Name
 export AZURE_FUNC_NAME=ScaleDown
 
-# Parameters for Function APp 
+# Parameters for FunctionApp
 export FUNC_PARAM_LOOKUP_TIME_IN_MINUTES=5
 export FUNC_PARAM_CPU_TRESHOLD=5
 export FUNC_PARAM_TABLE_PREFIX=WADMetricsPT1M
