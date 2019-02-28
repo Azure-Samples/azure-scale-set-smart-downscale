@@ -40,8 +40,8 @@ namespace httpTriggerAutoScale
             DateTime TimeOfCreation;
             CultureInfo provider = CultureInfo.InvariantCulture;
             string ScaleSetId = Environment.GetEnvironmentVariable("ScaleSetId");
-            int LookupTimeInMinutes = int.Parse(Environment.GetEnvironmentVariable("LookupTimeInMinutes"));
-            int CPUTreshold = int.Parse(Environment.GetEnvironmentVariable("CPUTreshold"));
+            int LookupTimeInMinutes = int.Parse(Environment.GetEnvironmentVariable("LookupTimeInMin"));
+            int CPUTreshold = int.Parse(Environment.GetEnvironmentVariable("CPUTresholdInPercent"));
             int DiskTresholdBytes = int.Parse(Environment.GetEnvironmentVariable("DiskTresholdBytes"));
             string TablePrefix = Environment.GetEnvironmentVariable("TablePrefix");
             string StorageAccountConnectionString = Environment.GetEnvironmentVariable("StorageAccountConnectionString");
