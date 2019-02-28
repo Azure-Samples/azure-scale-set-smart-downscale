@@ -39,20 +39,23 @@ az vmss create -n $AZURE_SCALESET_NAME -g $AZURE_RG_NAME \
 az storage account create -n $AZURE_SA_NAME -l $AZURE_DC_LOCATION -g $AZURE_RG_NAME --sku Standard_LRS
 
 # Create SAS token expiry date +1 year to current datetime
+# Wrong doc -- the format of datetime is '+%Y-%m-%dT%H:%M:00Z'
 export AZURE_SA_SAS_EXPIRY_DATE=`date -d "1 year" '+%Y-%m-%dT%H:%M:00Z'`
 export AZURE_SA_SAS_START_DATE=`date -d "-1 year" '+%Y-%m-%dT%H:%M:00Z'`
-# Get Azure SA Key
-# export AZURE_SA_KEY=`az storage account keys list -n $AZURE_SA_NAME -g $AZURE_RG_NAME --query [0].value --output tsv`
+
 # Get SAS token
 export AZURE_SA_SAS_TOKEN=`az storage account generate-sas --permissions acluw --account-name $AZURE_SA_NAME --services bt --resource-types co --expiry $AZURE_SA_SAS_EXPIRY_DATE --start $AZURE_SA_SAS_START_DATE --output tsv`
 
+# Get Scale Set Resource ID
 export AZURE_SCALESET_ID=`az vmss list --resource-group $AZURE_RG_NAME  --query [0].id --output tsv`
 
-
+# Cerate storage secret info JSON
 STORAGE_SECRET="{'storageAccountName': '$AZURE_SA_NAME', 'storageAccountSasToken': '$AZURE_SA_SAS_TOKEN'}"
 
+# Get default config for VMSS metrics for testing purposes
 az vmss diagnostics get-default-config > default_config.json
 
+# Replace placeholders in metrics config file with actual data
 sed -i "s#__DIAGNOSTIC_STORAGE_ACCOUNT__#$AZURE_SA_NAME#g" default_config.json
 sed -i "s#__VM_OR_VMSS_RESOURCE_ID__#$AZURE_SCALESET_ID#g" default_config.json
 
