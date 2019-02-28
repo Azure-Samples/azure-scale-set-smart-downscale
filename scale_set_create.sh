@@ -19,12 +19,13 @@ export AZURE_SCALESET_VM_SKU=Standard_B1s
 # Azure Storage Account name for the metrics collection usage
 export AZURE_SA_NAME=metricsstorageaccount	
 # Azure FunctionApp Name
-export AZURE_FUNC_NAME=ScaleDown
+export AZURE_FUNC_NAME=ScaleSetManager
 
 # Parameters for FunctionApp
 export FUNC_PARAM_LOOKUP_TIME_IN_MINUTES=5
 export FUNC_PARAM_CPU_TRESHOLD=5
 export FUNC_PARAM_TABLE_PREFIX=WADMetricsPT1M
+export FUNC_PARAM_STARTUP_DELAY_IN_MIN=30
 
 # Login to start script
 az login
@@ -77,11 +78,13 @@ az vmss diagnostics set --resource-group $AZURE_RG_NAME \
                         --settings  default_config.json \
                         --protected-settings "${STORAGE_SECRET}"
 
+export FUNC_PARAM_TIME_OF_CREATION=`date '+%Y-%m-%dT%H:%M:00Z'`
+
 # Get Azure Storage Account connection string to use in Fucntion App
 export AZURE_SA_CONNECTION_STRING=`az storage account show-connection-string  --name $AZURE_SA_NAME --resource-group $AZURE_RG_NAME --output tsv`
 
 # Build AppSettins for Function App
-export FUNCTION_APP_SETTINGS="ScaleSetId=$AZURE_SCALESET_ID LookupTimeInMinutes=$FUNC_PARAM_LOOKUP_TIME_IN_MINUTES CPUTreshold=$FUNC_PARAM_CPU_TRESHOLD TablePrefix=$FUNC_PARAM_TABLE_PREFIX StorageAccountConnectionString=$AZURE_SA_CONNECTION_STRING"
+export FUNCTION_APP_SETTINGS="ScaleSetId=$AZURE_SCALESET_ID LookupTimeInMinutes=$FUNC_PARAM_LOOKUP_TIME_IN_MINUTES CPUTreshold=$FUNC_PARAM_CPU_TRESHOLD TablePrefix=$FUNC_PARAM_TABLE_PREFIX StorageAccountConnectionString=$AZURE_SA_CONNECTION_STRING StartupDelayInMin=$FUNC_PARAM_STARTUP_DELAY_IN_MIN TimeOfCreation=$FUNC_PARAM_TIME_OF_CREATION"
 
 # Create FunctionApp
 az functionapp create --name $AZURE_FUNC_NAME --resource-group $AZURE_RG_NAME  --storage-account $AZURE_SA_NAME --consumption-plan-location $AZURE_DC_LOCATION
@@ -89,3 +92,7 @@ az functionapp create --name $AZURE_FUNC_NAME --resource-group $AZURE_RG_NAME  -
 # Add AppSettings to FunctionApp
 az functionapp config appsettings set --settings $FUNCTION_APP_SETTINGS --name $AZURE_FUNC_NAME --resource-group $AZURE_RG_NAME
 
+
+zip -r ScaleDown.zip my.azureauth
+
+az functionapp deployment source config-zip  --name $AZURE_FUNC_NAME --resource-group $AZURE_RG_NAME  --src ScaleDown.zip
