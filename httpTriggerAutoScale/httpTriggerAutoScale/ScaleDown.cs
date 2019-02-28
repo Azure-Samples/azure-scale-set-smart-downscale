@@ -15,41 +15,52 @@ using Microsoft.Azure.Cosmos.Table;
 using System.Text;
 using System.Collections.Generic;
 using System.Linq;
+using System.Globalization;
 
 namespace httpTriggerAutoScale
 {
     public static class ScaleDown
     {
-        //int LookupTimeInMinutes = 5;
-        //const int CPUTreshold = 5;
-        //const string scalesetid = "/subscriptions/3c5814b6-2535-4425-a242-9a3bd1718f29/resourceGroups/turbotest/providers/Microsoft.Compute/virtualMachineScaleSets/turboset";
-        //const string tablePrefix = "WADMetricsPT1M";
-        //const string tablename = "WADMetricsPT1MP10DV2S20190219";
-        //const string storageAccountConnectionString = @"BlobEndpoint=https://turborenderstorage.blob.core.windows.net/;QueueEndpoint=https://turborenderstorage.queue.core.windows.net/;FileEndpoint=https://turborenderstorage.file.core.windows.net/;TableEndpoint=https://turborenderstorage.table.core.windows.net/;SharedAccessSignature=sv=2018-03-28&ss=bfqt&srt=sco&sp=rwdlacup&se=2025-02-27T00:51:39Z&st=2019-02-26T16:51:39Z&spr=https&sig=YRTNQFZ2E8YV4S05WSbUDF3WWaAQWR0vYGKJAsHt5iE%3D";
 
         [FunctionName("ScaleDown")]
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req,
             ILogger log, ExecutionContext context)
         {
+            CultureInfo provider = CultureInfo.InvariantCulture;
+
             string ScaleSetId =         Environment.GetEnvironmentVariable("ScaleSetId");
             int LookupTimeInMinutes=    int.Parse(Environment.GetEnvironmentVariable("LookupTimeInMinutes"));
             int CPUTreshold =           int.Parse(Environment.GetEnvironmentVariable("CPUTreshold"));
             string TablePrefix =        Environment.GetEnvironmentVariable("TablePrefix");
             string StorageAccountConnectionString = Environment.GetEnvironmentVariable("StorageAccountConnectionString");
-
-            log.LogInformation("C# HTTP trigger function processed a request and will try to adjust scaleset. " + ScaleSetId);
-
-            var azure = AzureAuth(context);              
+            DateTime TimeOfCreation =   DateTime.ParseExact(Environment.GetEnvironmentVariable("TimeOfCreation"), "yyyy-MM-ddTHH:mm:ssZ", provider);
+            TimeSpan StartupDelayInMin= TimeSpan.FromMinutes(double.Parse(Environment.GetEnvironmentVariable("StartupDelayInMin")));
             
-            var metrics = GetMetricsFromTable(StorageAccountConnectionString, LookupTimeInMinutes, TablePrefix, ScaleSetId);
+            var timeInPast = DateTime.UtcNow.Subtract(StartupDelayInMin);
+            string logString;
 
-            var instances = GetInstancesToKill(metrics, CPUTreshold);
+            //Checking is the time right to start scaling, probably initial delay is not come yet
+            if (TimeOfCreation.ToUniversalTime() <= timeInPast)
+            {
+                log.LogInformation("HTTP trigger function processed a request and will try to adjust scaleset. " + ScaleSetId);
 
-            var dealocated = await DealocateInstances(instances, ScaleSetId, azure, log);
+                var azure = AzureAuth(context);
 
-            string logString = $"Done, number of dealocated instances {dealocated.Count.ToString()}: {String.Join(", ", dealocated.ToArray())}";
-            log.LogInformation(logString);
+                var metrics = GetMetricsFromTable(StorageAccountConnectionString, LookupTimeInMinutes, TablePrefix, ScaleSetId);
+
+                var instances = GetInstancesToKill(metrics, CPUTreshold);
+
+                var dealocated = await DealocateInstances(instances, ScaleSetId, azure, log);
+
+                logString = $"Done, number of dealocated instances {dealocated.Count.ToString()}: {String.Join(", ", dealocated.ToArray())}";
+                log.LogInformation(logString);
+            }
+            else {
+
+                logString = $"HTTP trigger function processed but Its to early to scale cluster time not come.";
+                log.LogInformation(logString);
+            }
 
             return (ActionResult)new OkObjectResult(logString);         
         }
@@ -58,6 +69,7 @@ namespace httpTriggerAutoScale
         private static async Task<List<string>> DealocateInstances(List<string> Instances, string scalesetid, IAzure AzureInstance, ILogger log) {
 
             var scaleset = AzureInstance.VirtualMachineScaleSets.GetById(scalesetid);
+            
             var instances = scaleset.VirtualMachines.List();
 
             List<string> dealocatedInstances = new List<string>();
