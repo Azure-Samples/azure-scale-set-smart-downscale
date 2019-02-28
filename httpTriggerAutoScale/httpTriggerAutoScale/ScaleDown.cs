@@ -21,24 +21,42 @@ namespace httpTriggerAutoScale
 {
     public static class ScaleDown
     {
+        //!!!!!!!!!!!!!!Important note!!!!!!!!!!!!!
+        //Before you will start, you will need a file my.azureauth with Rbac credentials here is a command to generate it
+        //az ad sp create-for-rbac --sdk-auth > my.azureauth
+        //
+        const string CpuMetricName = "/builtin/processor/percentprocessortime";
+        const string DiskMetricName = "/builtin/disk/bytespersecond";
 
         [FunctionName("ScaleDown")]
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req,
             ILogger log, ExecutionContext context)
-        {
-            CultureInfo provider = CultureInfo.InvariantCulture;
-
-            string ScaleSetId =         Environment.GetEnvironmentVariable("ScaleSetId");
-            int LookupTimeInMinutes=    int.Parse(Environment.GetEnvironmentVariable("LookupTimeInMinutes"));
-            int CPUTreshold =           int.Parse(Environment.GetEnvironmentVariable("CPUTreshold"));
-            string TablePrefix =        Environment.GetEnvironmentVariable("TablePrefix");
-            string StorageAccountConnectionString = Environment.GetEnvironmentVariable("StorageAccountConnectionString");
-            DateTime TimeOfCreation =   DateTime.ParseExact(Environment.GetEnvironmentVariable("TimeOfCreation"), "yyyy-MM-ddTHH:mm:ssZ", provider);
-            TimeSpan StartupDelayInMin= TimeSpan.FromMinutes(double.Parse(Environment.GetEnvironmentVariable("StartupDelayInMin")));
-            
-            var timeInPast = DateTime.UtcNow.Subtract(StartupDelayInMin);
+        {           
             string logString;
+
+            #region Capture init strings
+
+            DateTime TimeOfCreation;
+            CultureInfo provider = CultureInfo.InvariantCulture;
+            string ScaleSetId = Environment.GetEnvironmentVariable("ScaleSetId");
+            int LookupTimeInMinutes = int.Parse(Environment.GetEnvironmentVariable("LookupTimeInMinutes"));
+            int CPUTreshold = int.Parse(Environment.GetEnvironmentVariable("CPUTreshold"));
+            int DiskTresholdBytes = int.Parse(Environment.GetEnvironmentVariable("DiskTresholdBytes"));
+            string TablePrefix = Environment.GetEnvironmentVariable("TablePrefix");
+            string StorageAccountConnectionString = Environment.GetEnvironmentVariable("StorageAccountConnectionString");
+            bool parseddate = DateTime.TryParseExact(Environment.GetEnvironmentVariable("TimeOfCreation"), "yyyy-MM-ddTHH:mm:ssZ", provider,DateTimeStyles.AdjustToUniversal, out TimeOfCreation);
+            TimeSpan StartupDelayInMin = TimeSpan.FromMinutes(double.Parse(Environment.GetEnvironmentVariable("StartupDelayInMin")));
+            var timeInPast = DateTime.UtcNow.Subtract(StartupDelayInMin);
+
+            if (String.IsNullOrEmpty(ScaleSetId) || LookupTimeInMinutes <= 0 || CPUTreshold <= 0 || DiskTresholdBytes <= 0 ||
+                String.IsNullOrEmpty(TablePrefix) || String.IsNullOrEmpty(StorageAccountConnectionString) || !parseddate)
+            {
+                logString = $"HTTP trigger function started but not all init params are set";
+                log.LogInformation(logString);
+                return (ActionResult)new OkObjectResult(logString);
+            }
+            #endregion
 
             //Checking is the time right to start scaling, probably initial delay is not come yet
             if (TimeOfCreation.ToUniversalTime() <= timeInPast)
@@ -49,7 +67,7 @@ namespace httpTriggerAutoScale
 
                 var metrics = GetMetricsFromTable(StorageAccountConnectionString, LookupTimeInMinutes, TablePrefix, ScaleSetId);
 
-                var instances = GetInstancesToKill(metrics, CPUTreshold);
+                var instances = GetInstancesToKill(metrics, CPUTreshold, DiskTresholdBytes);
 
                 var dealocated = await DealocateInstances(instances, ScaleSetId, azure, log);
 
@@ -65,7 +83,9 @@ namespace httpTriggerAutoScale
             return (ActionResult)new OkObjectResult(logString);         
         }
 
-        //dealocating instances in scale-set based on instances list of ids
+        /// <summary>
+        /// Dealocating instances in scale-set based on instances list of ids
+        /// </summary>
         private static async Task<List<string>> DealocateInstances(List<string> Instances, string scalesetid, IAzure AzureInstance, ILogger log) {
 
             var scaleset = AzureInstance.VirtualMachineScaleSets.GetById(scalesetid);
@@ -80,9 +100,12 @@ namespace httpTriggerAutoScale
                 {
                     try
                     {
-                        //Task.Run(async () => await ins.DeallocateAsync()).ConfigureAwait(false).GetAwaiter().GetResult();
-                        await ins.DeallocateAsync();
-                        dealocatedInstances.Add(ins.ComputerName);
+                        //Check if instances not deallocated before
+                        if (!ins.PowerState.Value.ToLower().Contains("deallocated"))
+                        {
+                            await ins.DeallocateAsync();
+                            dealocatedInstances.Add(ins.ComputerName);
+                        }
                     }
                     catch (SystemException e) {
 
@@ -94,8 +117,10 @@ namespace httpTriggerAutoScale
             return dealocatedInstances;
         }
 
-        //Selecting intances that need to be killed based on low metrics
-        private static List<string> GetInstancesToKill(List<WadMetric> Metrics, int CPUTreshold) {
+        /// <summary>
+        /// Selecting intances that need to be killed based on low metrics
+        /// </summary>
+        private static List<string> GetInstancesToKill(List<WadMetric> Metrics, int CPUTreshold, int DiskTreshold) {
             List<string> instances = new List<string>();
 
             if (Metrics != null)
@@ -103,23 +128,30 @@ namespace httpTriggerAutoScale
                 if (Metrics.Count > 0)
                 {
                     //Calculate average by metric grouped by Host
-                    var groupedResult = Metrics.GroupBy(t => new { Host = t.Host })
+                    var groupedResult = Metrics.GroupBy(t => new { Host = t.Host, Metric = t.CounterName })
                                    .Select(g => new
                                    {
-                                       Average = g.Average(p => p.Average),
-                                       ID = g.Key.Host
+                                       HostID = g.Key.Host,
+                                       MetricID = g.Key.Metric,
+                                       Average =g.Average(y=>y.Average)  
                                    });
-                    //select intances with less thenCPUTreshold
-                    var ins = groupedResult.Where(x => x.Average <= CPUTreshold);
-                    instances = new List<string>(ins.Select(x => x.ID));
+                    //select intances with less then CPUTreshold and Disk
+                    var insCPU = groupedResult.Where(x => x.MetricID == CpuMetricName).Where(y => y.Average <= CPUTreshold).Select(x => x.HostID);
+                    var insDisk = groupedResult.Where(x => x.MetricID == DiskMetricName).Where(y => y.Average <= DiskTreshold).Select(x => x.HostID);
+
+                    var outlist = insCPU.Select(i => i.ToString()).Intersect(insDisk);
+
+                    instances = new List<string>(outlist);
                 }
 
             }           
 
             return instances;
-        } 
+        }
 
-        //Requesting Metrics from azure tables for each node in scale-set
+        /// <summary>
+        /// Requesting Metrics from azure tables for each node in scale-set
+        /// </summary>
         private static List<WadMetric> GetMetricsFromTable(string StorageAccountConnectionString,int LookupTimeInMinutes,  string TablePrefix, string ScalesetResourceID) {
 
             List<WadMetric> resultList = new List<WadMetric>();
@@ -143,14 +175,17 @@ namespace httpTriggerAutoScale
 
             //TODO add ROWKEY to encrease performance.
             TableQuery<WadMetric> rangeQuery = new TableQuery<WadMetric>().Where(
-                TableQuery.CombineFilters(TableQuery.CombineFilters(
-                        TableQuery.GenerateFilterCondition("PartitionKey",
-                                        QueryComparisons.Equal,
-                                        ScalesetResourceID.Replace("/", ":002F").Replace("-", ":002D").Replace(".", ":002E")),
+                TableQuery.CombineFilters(
+                    TableQuery.CombineFilters(
+                        TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, ScalesetResourceID.Replace("/", ":002F").Replace("-", ":002D").Replace(".", ":002E")),
                         TableOperators.And,
-                        TableQuery.GenerateFilterCondition("CounterName", QueryComparisons.Equal, "/builtin/processor/percentprocessortime")),
+                        TableQuery.GenerateFilterConditionForDate("TIMESTAMP", QueryComparisons.GreaterThanOrEqual, qdate)),
                     TableOperators.And,
-                    TableQuery.GenerateFilterConditionForDate("TIMESTAMP", QueryComparisons.GreaterThanOrEqual, qdate)));
+                    TableQuery.CombineFilters(
+                        TableQuery.GenerateFilterCondition("CounterName", QueryComparisons.Equal, CpuMetricName),
+                        TableOperators.Or,
+                        TableQuery.GenerateFilterCondition("CounterName", QueryComparisons.Equal, DiskMetricName)
+                    )));
                   
             var result = table.ExecuteQuery(rangeQuery);
 
@@ -165,7 +200,9 @@ namespace httpTriggerAutoScale
             return resultList;
         }
 
-        //Auth in azure api
+        /// <summary>
+        /// Auth in azure api
+        /// </summary>
         private static IAzure AzureAuth(ExecutionContext context) {
 
             var path = System.IO.Path.Combine(context.FunctionAppDirectory, "my.azureauth");
@@ -181,6 +218,9 @@ namespace httpTriggerAutoScale
         }
     }   
 
+    /// <summary>
+    /// Class to store entities from azure table metrics
+    /// </summary>
     public class WadMetric:TableEntity
     {
         public WadMetric(string PartitionKey, string RowKey)
