@@ -4,7 +4,8 @@
 export AZURE_SUBSCRIPTION_ID=
 # Azure Resource Group name
 export AZURE_RG_NAME=smart-scale-set-rg			 
-# Azure DC Location
+# Azure DC Location -- assume that FunctionApp consumption plan is availible in this location
+# Othewise should use specific location for FunctionApp creation
 export AZURE_DC_LOCATION=southcentralus	
 # Azure VM Scale Set name
 export AZURE_SCALESET_NAME=smart-scale-set	
@@ -18,8 +19,12 @@ export AZURE_SCALESET_VM_SKU=Standard_B1s
 # Azure Storage Account name for the metrics collection usage
 export AZURE_SA_NAME=metricsstorageaccount	
 # Azure Function Plan (AppService)
-export AZURE_FUNC_NAME=ScaleDown	
+export AZURE_FUNC_NAME=ScaleDown
 
+# Parameters for Function APp 
+export FUNC_PARAM_LOOKUP_TIME_IN_MINUTES=5
+export FUNC_PARAM_CPU_TRESHOLD=5
+export FUNC_PARAM_TABLE_PREFIX=WADMetricsPT1M
 
 # Login to start script
 az login
@@ -57,7 +62,7 @@ export AZURE_SA_SAS_TOKEN=`az storage account generate-sas --permissions acluw -
 export AZURE_SCALESET_ID=`az vmss list --resource-group $AZURE_RG_NAME  --query [0].id --output tsv`
 
 # Cerate storage secret info JSON
-STORAGE_SECRET="{'storageAccountName': '$AZURE_SA_NAME', 'storageAccountSasToken': '$AZURE_SA_SAS_TOKEN'}"
+export STORAGE_SECRET="{'storageAccountName': '$AZURE_SA_NAME', 'storageAccountSasToken': '$AZURE_SA_SAS_TOKEN'}"
 
 # Get default config for VMSS metrics for testing purposes
 az vmss diagnostics get-default-config > default_config.json
@@ -72,12 +77,15 @@ az vmss diagnostics set --resource-group $AZURE_RG_NAME \
                         --settings  default_config.json \
                         --protected-settings "${STORAGE_SECRET}"
 
+# Get Azure Storage Account connection string to use in Fucntion App
 export AZURE_SA_CONNECTION_STRING=`az storage account show-connection-string  --name $AZURE_SA_NAME --resource-group $AZURE_RG_NAME --output tsv`
 
-FUNCTION_APP_SETTINGS="ScaleSetId=$AZURE_SCALESET_ID LookupTimeInMinutes=5 CPUTreshold=5 TablePrefix=WADMetricsPT1M StorageAccountConnectionString=$AZURE_SA_CONNECTION_STRING"
+# Build AppSettins for Function App
+export FUNCTION_APP_SETTINGS="ScaleSetId=$AZURE_SCALESET_ID LookupTimeInMinutes=$FUNC_PARAM_LOOKUP_TIME_IN_MINUTES CPUTreshold=$FUNC_PARAM_CPU_TRESHOLD TablePrefix=$FUNC_PARAM_TABLE_PREFIX StorageAccountConnectionString=$AZURE_SA_CONNECTION_STRING"
 
 # Create FunctionApp
 az functionapp create --name $AZURE_FUNC_NAME --resource-group $AZURE_RG_NAME  --storage-account $AZURE_SA_NAME --consumption-plan-location $AZURE_DC_LOCATION
 
-# Add Env Variables to config Func
+# Add AppSettings to FunctionApp
 az functionapp config appsettings set --settings $FUNCTION_APP_SETTINGS --name $AZURE_FUNC_NAME --resource-group $AZURE_RG_NAME
+
