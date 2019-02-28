@@ -27,6 +27,9 @@ az login
 # Set required subscription
 az account set -s $AZURE_SUBSCRIPTION_ID
 
+# Generate my.azureauth file for function
+az ad sp create-for-rbac --sdk-auth > my.azureauth
+
 # Create Azure Resource Group
 az group create --name $AZURE_RG_NAME --location $AZURE_DC_LOCATION
 
