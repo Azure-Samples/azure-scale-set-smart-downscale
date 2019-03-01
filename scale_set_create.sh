@@ -69,11 +69,11 @@ export AZURE_SCALESET_ID=`az vmss list --resource-group $AZURE_RG_NAME  --query 
 export STORAGE_SECRET="{'storageAccountName': '$AZURE_SA_NAME', 'storageAccountSasToken': '$AZURE_SA_SAS_TOKEN'}"
 
 # Get default config for VMSS metrics for testing purposes
-az vmss diagnostics get-default-config > default_config.json
+# az vmss diagnostics get-default-config > default_config.json
 
 # Replace placeholders in metrics config file with actual data
-sed -i "s#__DIAGNOSTIC_STORAGE_ACCOUNT__#$AZURE_SA_NAME#g" default_config.json
-sed -i "s#__VM_OR_VMSS_RESOURCE_ID__#$AZURE_SCALESET_ID#g" default_config.json
+sed -i "s#__DIAGNOSTIC_STORAGE_ACCOUNT__#$AZURE_SA_NAME#g" metrics_config.json
+sed -i "s#__VM_OR_VMSS_RESOURCE_ID__#$AZURE_SCALESET_ID#g" metrics_config.json
 
 # Add metrics as sepcified in metrics_config.json to scale set
 az vmss diagnostics set --resource-group $AZURE_RG_NAME \
