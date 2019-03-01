@@ -78,7 +78,7 @@ sed -i "s#__VM_OR_VMSS_RESOURCE_ID__#$AZURE_SCALESET_ID#g" metrics_config.json
 # Add metrics as sepcified in metrics_config.json to scale set
 az vmss diagnostics set --resource-group $AZURE_RG_NAME \
                         --vmss-name $AZURE_SCALESET_NAME \
-                        --settings  default_config.json \
+                        --settings  metrics_config.json \
                         --protected-settings "${STORAGE_SECRET}"
 
 
