@@ -45,7 +45,13 @@ namespace httpTriggerAutoScale
             int DiskTresholdBytes = int.Parse(Environment.GetEnvironmentVariable("DiskTresholdBytes"));
             string TablePrefix = Environment.GetEnvironmentVariable("TablePrefix");
             string StorageAccountConnectionString = Environment.GetEnvironmentVariable("StorageAccountConnectionString");
-            bool parseddate = DateTime.TryParseExact(Environment.GetEnvironmentVariable("TimeOfCreation"), "yyyy-MM-ddTHH:mm:ssZ", provider,DateTimeStyles.AdjustToUniversal, out TimeOfCreation);
+
+            //We need store datetime value in base64 because azure function host automatially convert it to short date/time format
+            //without time zone info.
+            bool parseddate = DateTime.TryParseExact(
+                Encoding.UTF8.GetString(
+                    Convert.FromBase64String(
+                        Environment.GetEnvironmentVariable("TimeOfCreation"))), "yyyy-MM-ddTHH:mm:ssZ", provider,DateTimeStyles.AdjustToUniversal, out TimeOfCreation);
             TimeSpan StartupDelayInMin = TimeSpan.FromMinutes(double.Parse(Environment.GetEnvironmentVariable("StartupDelayInMin")));
             var timeInPast = DateTime.UtcNow.Subtract(StartupDelayInMin);
 
