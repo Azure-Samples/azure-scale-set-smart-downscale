@@ -48,6 +48,8 @@ az vmss create -n $AZURE_SCALESET_NAME -g $AZURE_RG_NAME \
             --load-balancer $AZURE_SCALESET_LB --lb-sku=Basic \
             --generate-ssh-keys
 
+ export FUNC_PARAM_TIME_OF_CREATION=`date '+%Y-%m-%dT%H:%M:00Z'`
+ FUNC_PARAM_TIME_OF_CREATION=`echo -n $FUNC_PARAM_TIME_OF_CREATION|base64 --wrap=0`
 
 # Create Azure Storage Account
 az storage account create --name $AZURE_SA_NAME --location $AZURE_DC_LOCATION --resource-group $AZURE_RG_NAME --sku Standard_LRS
@@ -79,7 +81,7 @@ az vmss diagnostics set --resource-group $AZURE_RG_NAME \
                         --settings  default_config.json \
                         --protected-settings "${STORAGE_SECRET}"
 
-export FUNC_PARAM_TIME_OF_CREATION=`date '+%Y-%m-%dT%H:%M:00Z'`
+
 
 # Get Azure Storage Account connection string to use in Fucntion App
 export AZURE_SA_CONNECTION_STRING=`az storage account show-connection-string  --name $AZURE_SA_NAME --resource-group $AZURE_RG_NAME --output tsv`
