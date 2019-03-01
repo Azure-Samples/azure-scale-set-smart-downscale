@@ -48,7 +48,7 @@ az vmss create -n $AZURE_SCALESET_NAME -g $AZURE_RG_NAME \
             --load-balancer $AZURE_SCALESET_LB --lb-sku=Basic \
             --generate-ssh-keys
 
- export FUNC_PARAM_TIME_OF_CREATION=`date '+%Y-%m-%dT%H:%M:00Z'`
+ export FUNC_PARAM_TIME_OF_CREATION=`date -u '+%Y-%m-%dT%H:%M:00Z'`
  FUNC_PARAM_TIME_OF_CREATION=`echo -n $FUNC_PARAM_TIME_OF_CREATION|base64 --wrap=0`
 
 # Create Azure Storage Account
@@ -56,8 +56,8 @@ az storage account create --name $AZURE_SA_NAME --location $AZURE_DC_LOCATION --
 
 # Create SAS token expiry date +1 year to current datetime
 # Wrong doc -- the format of datetime is '+%Y-%m-%dT%H:%M:00Z'
-export AZURE_SA_SAS_EXPIRY_DATE=`date -d "1 year" '+%Y-%m-%dT%H:%M:00Z'`
-export AZURE_SA_SAS_START_DATE=`date -d "-1 year" '+%Y-%m-%dT%H:%M:00Z'`
+export AZURE_SA_SAS_EXPIRY_DATE=`date -u -d "1 year" '+%Y-%m-%dT%H:%M:00Z'`
+export AZURE_SA_SAS_START_DATE=`date -u -d "-1 year" '+%Y-%m-%dT%H:%M:00Z'`
 
 # Get SAS token
 export AZURE_SA_SAS_TOKEN=`az storage account generate-sas --permissions acluw --account-name $AZURE_SA_NAME --services bt --resource-types co --expiry $AZURE_SA_SAS_EXPIRY_DATE --start $AZURE_SA_SAS_START_DATE --output tsv`
