@@ -26,6 +26,7 @@ export FUNC_PARAM_LOOKUP_TIME_IN_MINUTES=5
 export FUNC_PARAM_CPU_TRESHOLD=5
 export FUNC_PARAM_TABLE_PREFIX=WADMetricsPT1M
 export FUNC_PARAM_STARTUP_DELAY_IN_MIN=30
+export FUNC_PARAM_DISK_TRESHOLD_BYTES=3145728
 
 # Login to start script
 az login
@@ -47,6 +48,8 @@ az vmss create -n $AZURE_SCALESET_NAME -g $AZURE_RG_NAME \
             --load-balancer $AZURE_SCALESET_LB --lb-sku=Basic \
             --generate-ssh-keys
 
+ export FUNC_PARAM_TIME_OF_CREATION=`date '+%Y-%m-%dT%H:%M:00Z'`
+ FUNC_PARAM_TIME_OF_CREATION=`echo -n $FUNC_PARAM_TIME_OF_CREATION|base64 --wrap=0`
 
 # Create Azure Storage Account
 az storage account create --name $AZURE_SA_NAME --location $AZURE_DC_LOCATION --resource-group $AZURE_RG_NAME --sku Standard_LRS
@@ -78,13 +81,26 @@ az vmss diagnostics set --resource-group $AZURE_RG_NAME \
                         --settings  default_config.json \
                         --protected-settings "${STORAGE_SECRET}"
 
-export FUNC_PARAM_TIME_OF_CREATION=`date '+%Y-%m-%dT%H:%M:00Z'`
+
 
 # Get Azure Storage Account connection string to use in Fucntion App
 export AZURE_SA_CONNECTION_STRING=`az storage account show-connection-string  --name $AZURE_SA_NAME --resource-group $AZURE_RG_NAME --output tsv`
 
 # Build AppSettins for Function App
-export FUNCTION_APP_SETTINGS="ScaleSetId=$AZURE_SCALESET_ID LookupTimeInMinutes=$FUNC_PARAM_LOOKUP_TIME_IN_MINUTES CPUTreshold=$FUNC_PARAM_CPU_TRESHOLD TablePrefix=$FUNC_PARAM_TABLE_PREFIX StorageAccountConnectionString=$AZURE_SA_CONNECTION_STRING StartupDelayInMin=$FUNC_PARAM_STARTUP_DELAY_IN_MIN TimeOfCreation=$FUNC_PARAM_TIME_OF_CREATION FUNCTIONS_EXTENSION_VERSION=~2 WEBSITE_RUN_FROM_PACKAGE=1"
+# Space separated <key>=<value> pairs
+# To simplify management devided for series of operations
+export FUNCTION_APP_SETTINGS="ScaleSetId=$AZURE_SCALESET_ID "
+FUNCTION_APP_SETTINGS=$FUNCTION_APP_SETTINGS"LookupTimeInMin=$FUNC_PARAM_LOOKUP_TIME_IN_MINUTES "
+FUNCTION_APP_SETTINGS=$FUNCTION_APP_SETTINGS"CPUTresholdInPercent=$FUNC_PARAM_CPU_TRESHOLD "
+FUNCTION_APP_SETTINGS=$FUNCTION_APP_SETTINGS"TablePrefix=$FUNC_PARAM_TABLE_PREFIX "
+FUNCTION_APP_SETTINGS=$FUNCTION_APP_SETTINGS"DiskTresholdBytes=$FUNC_PARAM_DISK_TRESHOLD_BYTES "
+FUNCTION_APP_SETTINGS=$FUNCTION_APP_SETTINGS"StorageAccountConnectionString=$AZURE_SA_CONNECTION_STRING "
+FUNCTION_APP_SETTINGS=$FUNCTION_APP_SETTINGS"StartupDelayInMin=$FUNC_PARAM_STARTUP_DELAY_IN_MIN "
+FUNCTION_APP_SETTINGS=$FUNCTION_APP_SETTINGS"TimeOfCreation=$FUNC_PARAM_TIME_OF_CREATION "
+# FunctionApp runtime for netcore app 2 is required
+FUNCTION_APP_SETTINGS=$FUNCTION_APP_SETTINGS"FUNCTIONS_EXTENSION_VERSION=~2 "
+# We use zip package deployment so tell it to runtime
+FUNCTION_APP_SETTINGS=$FUNCTION_APP_SETTINGS"WEBSITE_RUN_FROM_PACKAGE=1"
 
 # Create FunctionApp
 az functionapp create --name $AZURE_FUNC_NAME --resource-group $AZURE_RG_NAME  --storage-account $AZURE_SA_NAME --consumption-plan-location $AZURE_DC_LOCATION
@@ -92,7 +108,8 @@ az functionapp create --name $AZURE_FUNC_NAME --resource-group $AZURE_RG_NAME  -
 # Add AppSettings to FunctionApp
 az functionapp config appsettings set --settings $FUNCTION_APP_SETTINGS --name $AZURE_FUNC_NAME --resource-group $AZURE_RG_NAME
 
-
+# Add authentication information to FunctionApp Package
 zip -r ScaleDown.zip my.azureauth
 
+# Deploy FunctionApp Package
 az functionapp deployment source config-zip  --name $AZURE_FUNC_NAME --resource-group $AZURE_RG_NAME  --src ScaleDown.zip
