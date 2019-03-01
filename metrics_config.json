@@ -1,5 +1,5 @@
 {
-    "StorageAccount": "TRStorageName",
+    "StorageAccount": "__DIAGNOSTIC_STORAGE_ACCOUNT__",
     "ladCfg": {
       "diagnosticMonitorConfiguration": {
         "eventVolume": "Medium",
@@ -9,7 +9,7 @@
               "scheduledTransferPeriod": "PT1M"
             }
           ],
-          "resourceId": "TRResourceID"
+          "resourceId": "__VM_OR_VMSS_RESOURCE_ID__"
         },
         "performanceCounters": {
           "performanceCounterConfiguration": [           
