@@ -44,7 +44,7 @@ az account set -s $AZURE_SUBSCRIPTION_ID
 az group create --name $AZURE_RG_NAME --location $AZURE_DC_LOCATION
 
 # Generate SP and export my.azureauth file for the function to manage scale set
-az ad sp create-for-rbac --scopes /subscriptions/{$AZURE_SUBSCRIPTION_ID}/resourceGroups/{$AZURE_RG_NAME} --sdk-auth > my.azureauth
+az ad sp create-for-rbac --scopes /subscriptions/$AZURE_SUBSCRIPTION_ID/resourceGroups/$AZURE_RG_NAME --sdk-auth > my.azureauth
 
 
 # Create Azure VM Scale Set -- can be customized according requrements
