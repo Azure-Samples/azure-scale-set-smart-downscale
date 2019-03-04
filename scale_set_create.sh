@@ -16,6 +16,9 @@ export AZURE_SCALESET_LB=smart-scale-set-lb
 export AZURE_SCALESET_BASE_IMAGE=UbuntuLTS
 # Azure Scale Set VM SKU
 export AZURE_SCALESET_VM_SKU=Standard_B1s
+# Azure VM Admin User Name
+export AZURE_SCALESET_VM_USER_NAME=render_user
+
 # Azure Storage Account name for the metrics collection usage
 export AZURE_SA_NAME=metricsstorageaccount	
 # Azure FunctionApp Name
@@ -49,6 +52,7 @@ az vmss create -n $AZURE_SCALESET_NAME -g $AZURE_RG_NAME \
             --image $AZURE_SCALESET_BASE_IMAGE \
             --vm-sku $AZURE_SCALESET_VM_SKU \
             --load-balancer $AZURE_SCALESET_LB --lb-sku=Basic \
+            --admin-username $AZURE_SCALESET_VM_USER_NAME \
             --generate-ssh-keys
 
  export FUNC_PARAM_TIME_OF_CREATION=`date -u '+%Y-%m-%dT%H:%M:00Z'`
