@@ -21,6 +21,9 @@ export AZURE_SA_NAME=metricsstorageaccount
 # Azure FunctionApp Name
 export AZURE_FUNC_NAME=ScaleSetManager$RANDOM
 
+# Azure FunctionApp Zip Package Name
+export AZURE_FUNC_PACKAGE=ScaleDown.zip
+
 # Parameters for FunctionApp
 export FUNC_PARAM_LOOKUP_TIME_IN_MINUTES=5
 export FUNC_PARAM_CPU_TRESHOLD=5
@@ -34,7 +37,7 @@ az login
 # Set required subscription
 az account set -s $AZURE_SUBSCRIPTION_ID
 
-# Generate my.azureauth file for function
+# Generate SP and export my.azureauth file for the function
 az ad sp create-for-rbac --sdk-auth > my.azureauth
 
 # Create Azure Resource Group
@@ -109,7 +112,7 @@ az functionapp create --name $AZURE_FUNC_NAME --resource-group $AZURE_RG_NAME  -
 az functionapp config appsettings set --settings $FUNCTION_APP_SETTINGS --name $AZURE_FUNC_NAME --resource-group $AZURE_RG_NAME
 
 # Add authentication information to FunctionApp Package
-zip -r ScaleDown.zip my.azureauth
+zip -r $AZURE_FUNC_PACKAGE my.azureauth
 
 # Deploy FunctionApp Package
-az functionapp deployment source config-zip  --name $AZURE_FUNC_NAME --resource-group $AZURE_RG_NAME  --src ScaleDown.zip
+az functionapp deployment source config-zip  --name $AZURE_FUNC_NAME --resource-group $AZURE_RG_NAME  --src $AZURE_FUNC_PACKAGE
