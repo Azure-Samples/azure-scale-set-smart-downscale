@@ -20,7 +20,7 @@ export AZURE_SCALESET_VM_SKU=Standard_B1s
 export AZURE_SCALESET_VM_USER_NAME=render_user
 
 # Azure Storage Account name for the metrics collection usage
-export AZURE_SA_NAME=metricsstorageaccount$RANDOM	
+export AZURE_SA_NAME=metricsstorag$RANDOM	
 # Azure FunctionApp Name
 export AZURE_FUNC_NAME=ScaleSetManager$RANDOM
 
@@ -71,7 +71,7 @@ export AZURE_SA_SAS_START_DATE=`date -u -d "-1 year" '+%Y-%m-%dT%H:%M:00Z'`
 export AZURE_SA_SAS_TOKEN=`az storage account generate-sas --permissions acluw --account-name $AZURE_SA_NAME --services bt --resource-types co --expiry $AZURE_SA_SAS_EXPIRY_DATE --start $AZURE_SA_SAS_START_DATE --output tsv`
 
 # Get Scale Set Resource ID
-export AZURE_SCALESET_ID=`az vmss list --resource-group $AZURE_RG_NAME  --query [0].id --output tsv`
+export AZURE_SCALESET_ID=`az vmss show --resource-group $AZURE_RG_NAME --name $AZURE_SCALESET_NAME --query id --output tsv`
 
 # Cerate storage secret info JSON
 export STORAGE_SECRET="{'storageAccountName': '$AZURE_SA_NAME', 'storageAccountSasToken': '$AZURE_SA_SAS_TOKEN'}"
