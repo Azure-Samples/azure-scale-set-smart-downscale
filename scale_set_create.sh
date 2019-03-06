@@ -12,6 +12,10 @@ export AZURE_SCALESET_NAME=smart-scale-set-$RANDOM
 # Azure VM Scale Set LB
 export AZURE_SCALESET_LB=smart-scale-set-lb-$RANDOM
 
+# Azure VNET
+export AZURE_SCALESET_VNET=
+
+
 # Azure Scale Set VM URN or URI
 export AZURE_SCALESET_BASE_IMAGE=UbuntuLTS
 # Azure Scale Set VM SKU
@@ -50,6 +54,9 @@ az ad sp create-for-rbac --scopes /subscriptions/$AZURE_SUBSCRIPTION_ID/resource
 # Create Azure VM Scale Set -- can be customized according requrements
 # Currently uses just base parameters for PoC
 az vmss create -n $AZURE_SCALESET_NAME -g $AZURE_RG_NAME \
+            if [ -z "$AZURE_SCALESET_VNET" ]
+            --vnet-name $AZURE_SCALESET_VNET \
+            fi
             --image $AZURE_SCALESET_BASE_IMAGE \
             --vm-sku $AZURE_SCALESET_VM_SKU \
             --load-balancer $AZURE_SCALESET_LB --lb-sku=Basic \
