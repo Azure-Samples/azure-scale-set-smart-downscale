@@ -3,21 +3,21 @@
 # Azure Subscription ID to deploy
 export AZURE_SUBSCRIPTION_ID=
 # Azure Resource Group name
-export AZURE_RG_NAME=smart-scale-set-rg			 
+export AZURE_RG_NAME=smart-scale-set-$RANDOM-rg			 
 # Azure DC Location -- assume that FunctionApp consumption plan is availible in this location
 # Othewise should use specific location for FunctionApp creation
 export AZURE_DC_LOCATION=southcentralus	
 # Azure VM Scale Set name
-export AZURE_SCALESET_NAME=smart-scale-set	
+export AZURE_SCALESET_NAME=smart-scale-set-$RANDOM	
 # Azure VM Scale Set LB
-export AZURE_SCALESET_LB=smart-scale-set-lb
+export AZURE_SCALESET_LB=smart-scale-set-lb-$RANDOM
 
 # Azure Scale Set VM URN or URI
 export AZURE_SCALESET_BASE_IMAGE=UbuntuLTS
 # Azure Scale Set VM SKU
 export AZURE_SCALESET_VM_SKU=Standard_B1s
 # Azure VM Admin User Name
-export AZURE_SCALESET_VM_USER_NAME=render_user
+export AZURE_SCALESET_VM_USER_NAME=render_user-$RANDOM
 
 # Azure Storage Account name for the metrics collection usage
 export AZURE_SA_NAME=metricsstorage$RANDOM	
