@@ -20,7 +20,7 @@ export AZURE_SCALESET_VM_SKU=Standard_B1s
 export AZURE_SCALESET_VM_USER_NAME=render_user
 
 # Azure Storage Account name for the metrics collection usage
-export AZURE_SA_NAME=metricsstorag$RANDOM	
+export AZURE_SA_NAME=metricsstorage$RANDOM	
 # Azure FunctionApp Name
 export AZURE_FUNC_NAME=ScaleSetManager$RANDOM
 
@@ -79,14 +79,18 @@ export STORAGE_SECRET="{'storageAccountName': '$AZURE_SA_NAME', 'storageAccountS
 # Get default config for VMSS metrics for testing purposes
 # az vmss diagnostics get-default-config > default_config.json
 
+export METRICS_FILE_NAME=metrics_config_$RANDOM.jsom
+
+cp metrics_config.json $METRICS_FILE_NAME
+
 # Replace placeholders in metrics config file with actual data
-sed -i "s#__DIAGNOSTIC_STORAGE_ACCOUNT__#$AZURE_SA_NAME#g" metrics_config.json
-sed -i "s#__VM_OR_VMSS_RESOURCE_ID__#$AZURE_SCALESET_ID#g" metrics_config.json
+sed -i "s#__DIAGNOSTIC_STORAGE_ACCOUNT__#$AZURE_SA_NAME#g" $METRICS_FILE_NAME
+sed -i "s#__VM_OR_VMSS_RESOURCE_ID__#$AZURE_SCALESET_ID#g" $METRICS_FILE_NAME
 
 # Add metrics as sepcified in metrics_config.json to scale set
 az vmss diagnostics set --resource-group $AZURE_RG_NAME \
                         --vmss-name $AZURE_SCALESET_NAME \
-                        --settings  metrics_config.json \
+                        --settings  $METRICS_FILE_NAME \
                         --protected-settings "${STORAGE_SECRET}"
 
 
