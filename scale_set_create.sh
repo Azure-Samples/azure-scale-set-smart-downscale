@@ -79,7 +79,7 @@ export STORAGE_SECRET="{'storageAccountName': '$AZURE_SA_NAME', 'storageAccountS
 # Get default config for VMSS metrics for testing purposes
 # az vmss diagnostics get-default-config > default_config.json
 
-export METRICS_FILE_NAME=metrics_config_$RANDOM.jsom
+export METRICS_FILE_NAME=metrics_config_$RANDOM.json
 
 cp metrics_config.json $METRICS_FILE_NAME
 
