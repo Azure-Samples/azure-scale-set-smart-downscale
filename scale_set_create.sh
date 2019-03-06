@@ -20,7 +20,7 @@ export AZURE_SCALESET_VM_SKU=Standard_B1s
 export AZURE_SCALESET_VM_USER_NAME=render_user
 
 # Azure Storage Account name for the metrics collection usage
-export AZURE_SA_NAME=metricsstorageaccount	
+export AZURE_SA_NAME=metricsstorageaccount$RANDOM	
 # Azure FunctionApp Name
 export AZURE_FUNC_NAME=ScaleSetManager$RANDOM
 
