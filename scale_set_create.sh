@@ -53,15 +53,26 @@ az ad sp create-for-rbac --scopes /subscriptions/$AZURE_SUBSCRIPTION_ID/resource
 
 # Create Azure VM Scale Set -- can be customized according requrements
 # Currently uses just base parameters for PoC
+if [ -z "$AZURE_SCALESET_VNET" ]
+then
+# $AZURE_SCALESET_VNET is empty
 az vmss create -n $AZURE_SCALESET_NAME -g $AZURE_RG_NAME \
-            if [ -z "$AZURE_SCALESET_VNET" ]
-            --vnet-name $AZURE_SCALESET_VNET \
-            fi
             --image $AZURE_SCALESET_BASE_IMAGE \
             --vm-sku $AZURE_SCALESET_VM_SKU \
             --load-balancer $AZURE_SCALESET_LB --lb-sku=Basic \
             --admin-username $AZURE_SCALESET_VM_USER_NAME \
             --generate-ssh-keys
+else
+# $AZURE_SCALESET_VNET is set
+az vmss create -n $AZURE_SCALESET_NAME -g $AZURE_RG_NAME \
+            --vnet-name $AZURE_SCALESET_VNET \
+            --image $AZURE_SCALESET_BASE_IMAGE \
+            --vm-sku $AZURE_SCALESET_VM_SKU \
+            --load-balancer $AZURE_SCALESET_LB --lb-sku=Basic \
+            --admin-username $AZURE_SCALESET_VM_USER_NAME \
+            --generate-ssh-keys
+
+fi
 
  export FUNC_PARAM_TIME_OF_CREATION=`date -u '+%Y-%m-%dT%H:%M:00Z'`
  FUNC_PARAM_TIME_OF_CREATION=`echo -n $FUNC_PARAM_TIME_OF_CREATION|base64 --wrap=0`
