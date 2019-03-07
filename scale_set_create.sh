@@ -23,7 +23,9 @@ export AZURE_SCALESET_BASE_IMAGE=UbuntuLTS
 # Azure Scale Set VM SKU
 export AZURE_SCALESET_VM_SKU=Standard_B1s
 # Azure VM Admin User Name
-export AZURE_SCALESET_VM_USER_NAME=render_user-$RANDOM
+export AZURE_SCALESET_VM_USER_NAME=render_user
+export AZURE_SCALESET_VM_USER_PASSWORD=AlgousPass11
+export AZURE_SCALESET_INSTANCE_COUNT=10
 
 # Azure Storage Account name for the metrics collection usage
 export AZURE_SA_NAME=metricsstorage$RANDOM
@@ -63,7 +65,10 @@ az vmss create -n $AZURE_SCALESET_NAME -g $AZURE_RG_NAME \
             --vm-sku $AZURE_SCALESET_VM_SKU \
             --load-balancer $AZURE_SCALESET_LB --lb-sku=Basic \
             --admin-username $AZURE_SCALESET_VM_USER_NAME \
-            --generate-ssh-keys
+            --admin-password $AZURE_SCALESET_VM_USER_PASSWORD \
+            --instance-count $AZURE_SCALESET_INSTANCE_COUNT \
+            --eviction-policy delete \
+            --priority Low
 else
 # $AZURE_SCALESET_SUBNET is set
 az vmss create -n $AZURE_SCALESET_NAME -g $AZURE_RG_NAME \
@@ -72,7 +77,10 @@ az vmss create -n $AZURE_SCALESET_NAME -g $AZURE_RG_NAME \
             --vm-sku $AZURE_SCALESET_VM_SKU \
             --load-balancer $AZURE_SCALESET_LB --lb-sku=Basic \
             --admin-username $AZURE_SCALESET_VM_USER_NAME \
-            --generate-ssh-keys
+            --admin-password $AZURE_SCALESET_VM_USER_PASSWORD \
+            --instance-count $AZURE_SCALESET_INSTANCE_COUNT \
+            --eviction-policy delete \
+            --priority Low
 
 fi
 
