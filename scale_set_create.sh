@@ -68,9 +68,9 @@ az vmss create -n $AZURE_SCALESET_NAME -g $AZURE_RG_NAME \
             --load-balancer $AZURE_SCALESET_LB --lb-sku=Basic \
             --admin-username $AZURE_SCALESET_VM_USER_NAME \
             --admin-password $AZURE_SCALESET_VM_USER_PASSWORD \
-            --instance-count $AZURE_SCALESET_INSTANCE_COUNT \
-            --eviction-policy delete \
-            --priority Low
+            --instance-count $AZURE_SCALESET_INSTANCE_COUNT \
+            --eviction-policy delete \
+            --priority Low
 else
 # $AZURE_SCALESET_SUBNET is set
 az vmss create -n $AZURE_SCALESET_NAME -g $AZURE_RG_NAME \
@@ -80,9 +80,9 @@ az vmss create -n $AZURE_SCALESET_NAME -g $AZURE_RG_NAME \
             --load-balancer $AZURE_SCALESET_LB --lb-sku=Basic \
             --admin-username $AZURE_SCALESET_VM_USER_NAME \
             --admin-password $AZURE_SCALESET_VM_USER_PASSWORD \
-            --instance-count $AZURE_SCALESET_INSTANCE_COUNT \
-            --eviction-policy delete \
-            --priority Low
+            --instance-count $AZURE_SCALESET_INSTANCE_COUNT \
+            --eviction-policy delete \
+            --priority Low
 
 fi
 
