@@ -3,7 +3,7 @@
 # Exit if any command fails
 set -e
 
-# Azure Random Seed to have unique names
+# Random Seed to have unique names
 export AZURE_RANDOM_ID=$RANDOM
 
 # Azure Subscription ID to deploy
@@ -66,7 +66,8 @@ then
 az vmss create -n $AZURE_SCALESET_NAME -g $AZURE_RG_NAME \
             --image $AZURE_SCALESET_BASE_IMAGE \
             --vm-sku $AZURE_SCALESET_VM_SKU \
-            --load-balancer $AZURE_SCALESET_LB --lb-sku=Basic \
+            --load-balancer $AZURE_SCALESET_LB \
+            --lb-sku=Basic \
             --admin-username $AZURE_SCALESET_VM_USER_NAME \
             --admin-password $AZURE_SCALESET_VM_USER_PASSWORD \
             --instance-count $AZURE_SCALESET_INSTANCE_COUNT \
@@ -78,7 +79,8 @@ az vmss create -n $AZURE_SCALESET_NAME -g $AZURE_RG_NAME \
             --subnet $AZURE_SCALESET_SUBNET \
             --image $AZURE_SCALESET_BASE_IMAGE \
             --vm-sku $AZURE_SCALESET_VM_SKU \
-            --load-balancer $AZURE_SCALESET_LB --lb-sku=Basic \
+            --load-balancer $AZURE_SCALESET_LB \
+            --lb-sku=Basic \
             --admin-username $AZURE_SCALESET_VM_USER_NAME \
             --admin-password $AZURE_SCALESET_VM_USER_PASSWORD \
             --instance-count $AZURE_SCALESET_INSTANCE_COUNT \
