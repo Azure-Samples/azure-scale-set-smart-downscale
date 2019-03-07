@@ -3,6 +3,7 @@
 # Exit if any command fails
 set -e
 
+# Azure Random Seed to have unique names
 export AZURE_RANDOM_ID=$RANDOM
 
 # Azure Subscription ID to deploy
