@@ -1,20 +1,22 @@
 #!/bin/bash
 
+# Exit if any command fails
+set -e
+
 # Azure Subscription ID to deploy
 export AZURE_SUBSCRIPTION_ID=
 # Azure Resource Group name
-export AZURE_RG_NAME=smart-scale-set-$RANDOM-rg			 
+export AZURE_RG_NAME=smart-scale-set-$RANDOM-rg
 # Azure DC Location -- assume that FunctionApp consumption plan is availible in this location
 # Othewise should use specific location for FunctionApp creation
-export AZURE_DC_LOCATION=southcentralus	
+export AZURE_DC_LOCATION=southcentralus
 # Azure VM Scale Set name
-export AZURE_SCALESET_NAME=smart-scale-set-$RANDOM	
+export AZURE_SCALESET_NAME=smart-scale-set-$RANDOM
 # Azure VM Scale Set LB
 export AZURE_SCALESET_LB=smart-scale-set-lb-$RANDOM
 
-# Azure VNET
-export AZURE_SCALESET_VNET=
-
+# Azure subnet ResourceID
+export AZURE_SCALESET_SUBNET=
 
 # Azure Scale Set VM URN or URI
 export AZURE_SCALESET_BASE_IMAGE=UbuntuLTS
@@ -24,7 +26,7 @@ export AZURE_SCALESET_VM_SKU=Standard_B1s
 export AZURE_SCALESET_VM_USER_NAME=render_user-$RANDOM
 
 # Azure Storage Account name for the metrics collection usage
-export AZURE_SA_NAME=metricsstorage$RANDOM	
+export AZURE_SA_NAME=metricsstorage$RANDOM
 # Azure FunctionApp Name
 export AZURE_FUNC_NAME=ScaleSetManager$RANDOM
 
@@ -65,7 +67,7 @@ az vmss create -n $AZURE_SCALESET_NAME -g $AZURE_RG_NAME \
 else
 # $AZURE_SCALESET_VNET is set
 az vmss create -n $AZURE_SCALESET_NAME -g $AZURE_RG_NAME \
-            --vnet-name $AZURE_SCALESET_VNET \
+            --subnet $AZURE_SCALESET_SUBNET \
             --image $AZURE_SCALESET_BASE_IMAGE \
             --vm-sku $AZURE_SCALESET_VM_SKU \
             --load-balancer $AZURE_SCALESET_LB --lb-sku=Basic \
