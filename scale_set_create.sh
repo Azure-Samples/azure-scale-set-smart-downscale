@@ -114,7 +114,6 @@ az vmss diagnostics set --resource-group $AZURE_RG_NAME \
                         --protected-settings "${STORAGE_SECRET}"
 
 
-
 # Get Azure Storage Account connection string to use in Fucntion App
 export AZURE_SA_CONNECTION_STRING=`az storage account show-connection-string  --name $AZURE_SA_NAME --resource-group $AZURE_RG_NAME --output tsv`
 
@@ -129,7 +128,7 @@ FUNCTION_APP_SETTINGS=$FUNCTION_APP_SETTINGS"DiskTresholdBytes=$FUNC_PARAM_DISK_
 FUNCTION_APP_SETTINGS=$FUNCTION_APP_SETTINGS"StorageAccountConnectionString=$AZURE_SA_CONNECTION_STRING "
 FUNCTION_APP_SETTINGS=$FUNCTION_APP_SETTINGS"StartupDelayInMin=$FUNC_PARAM_STARTUP_DELAY_IN_MIN "
 FUNCTION_APP_SETTINGS=$FUNCTION_APP_SETTINGS"TimeOfCreation=$FUNC_PARAM_TIME_OF_CREATION "
-# FunctionApp runtime for netcore app 2 is required
+# FunctionApp runtime for netcore app - 2 is required
 FUNCTION_APP_SETTINGS=$FUNCTION_APP_SETTINGS"FUNCTIONS_EXTENSION_VERSION=~2 "
 # We use zip package deployment so tell it to runtime
 FUNCTION_APP_SETTINGS=$FUNCTION_APP_SETTINGS"WEBSITE_RUN_FROM_PACKAGE=1"
