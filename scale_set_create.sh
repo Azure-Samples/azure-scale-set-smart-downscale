@@ -55,9 +55,9 @@ az ad sp create-for-rbac --scopes /subscriptions/$AZURE_SUBSCRIPTION_ID/resource
 
 # Create Azure VM Scale Set -- can be customized according requrements
 # Currently uses just base parameters for PoC
-if [ -z "$AZURE_SCALESET_VNET" ]
+if [ -z "$AZURE_SCALESET_SUBNET" ]
 then
-# $AZURE_SCALESET_VNET is empty
+# $AZURE_SCALESET_SUBNET is empty
 az vmss create -n $AZURE_SCALESET_NAME -g $AZURE_RG_NAME \
             --image $AZURE_SCALESET_BASE_IMAGE \
             --vm-sku $AZURE_SCALESET_VM_SKU \
@@ -65,7 +65,7 @@ az vmss create -n $AZURE_SCALESET_NAME -g $AZURE_RG_NAME \
             --admin-username $AZURE_SCALESET_VM_USER_NAME \
             --generate-ssh-keys
 else
-# $AZURE_SCALESET_VNET is set
+# $AZURE_SCALESET_SUBNET is set
 az vmss create -n $AZURE_SCALESET_NAME -g $AZURE_RG_NAME \
             --subnet $AZURE_SCALESET_SUBNET \
             --image $AZURE_SCALESET_BASE_IMAGE \
