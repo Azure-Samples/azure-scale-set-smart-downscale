@@ -23,7 +23,7 @@ export AZURE_SCALESET_SUBNET=
 # Azure Scale Set VM URN or URI
 export AZURE_SCALESET_BASE_IMAGE=UbuntuLTS
 # Azure Scale Set VM SKU
-export AZURE_SCALESET_VM_SKU=Standard_B1s
+export AZURE_SCALESET_VM_SKU=Standard_D4s_v3
 # Azure VM Admin User Name
 export AZURE_SCALESET_VM_USER_NAME=render_user
 export AZURE_SCALESET_VM_USER_PASSWORD=AlgousPass11
