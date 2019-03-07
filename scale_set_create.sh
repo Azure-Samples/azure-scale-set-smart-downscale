@@ -3,17 +3,19 @@
 # Exit if any command fails
 set -e
 
+export AZURE_RANDOM_ID=$RANDOM
+
 # Azure Subscription ID to deploy
 export AZURE_SUBSCRIPTION_ID=
 # Azure Resource Group name
-export AZURE_RG_NAME=smart-scale-set-$RANDOM-rg
+export AZURE_RG_NAME=smart-scale-set-$AZURE_RANDOM_ID-rg
 # Azure DC Location -- assume that FunctionApp consumption plan is availible in this location
 # Othewise should use specific location for FunctionApp creation
 export AZURE_DC_LOCATION=southcentralus
 # Azure VM Scale Set name
-export AZURE_SCALESET_NAME=smart-scale-set-$RANDOM
+export AZURE_SCALESET_NAME=smart-scale-set-$AZURE_RANDOM_ID
 # Azure VM Scale Set LB
-export AZURE_SCALESET_LB=smart-scale-set-lb-$RANDOM
+export AZURE_SCALESET_LB=smart-scale-set-lb-$AZURE_RANDOM_ID
 
 # Azure subnet ResourceID
 export AZURE_SCALESET_SUBNET=
@@ -28,9 +30,9 @@ export AZURE_SCALESET_VM_USER_PASSWORD=AlgousPass11
 export AZURE_SCALESET_INSTANCE_COUNT=10
 
 # Azure Storage Account name for the metrics collection usage
-export AZURE_SA_NAME=metricsstorage$RANDOM
+export AZURE_SA_NAME=metricsstorage$AZURE_RANDOM_ID
 # Azure FunctionApp Name
-export AZURE_FUNC_NAME=ScaleSetManager$RANDOM
+export AZURE_FUNC_NAME=ScaleSetManager$AZURE_RANDOM_ID
 
 # Azure FunctionApp Zip Package Name
 export AZURE_FUNC_PACKAGE=ScaleDown.zip
@@ -107,7 +109,7 @@ export STORAGE_SECRET="{'storageAccountName': '$AZURE_SA_NAME', 'storageAccountS
 # Get default config for VMSS metrics for testing purposes
 # az vmss diagnostics get-default-config > default_config.json
 
-export METRICS_FILE_NAME=metrics_config_$RANDOM.json
+export METRICS_FILE_NAME=metrics_config_$AZURE_RANDOM_ID.json
 
 cp metrics_config.json $METRICS_FILE_NAME
 
