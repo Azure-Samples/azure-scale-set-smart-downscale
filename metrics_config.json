@@ -12,7 +12,7 @@
           "resourceId": "__VM_OR_VMSS_RESOURCE_ID__"
         },
         "performanceCounters": {
-          "performanceCounterConfiguration": [           
+          "performanceCounterConfiguration": [
             {
               "annotation": [
                 {
@@ -27,7 +27,6 @@
               "type": "builtin",
               "unit": "BytesPerSecond"
             },
-           
             {
               "annotation": [
                 {
@@ -127,4 +126,4 @@
       },
       "sampleRateInSeconds": 15
     }
-}  
+}
