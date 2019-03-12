@@ -21,14 +21,14 @@ export AZURE_SCALESET_LB=smart-scale-set-lb-$AZURE_RANDOM_ID
 # Azure subnet ResourceID
 export AZURE_SCALESET_SUBNET=
 
-# Azure Scale Set VM URN or URI
-export AZURE_SCALESET_BASE_IMAGE=UbuntuLTS
+# Azure Scale Set VM URN or URI Win2016Datacenter -- UbuntuLTS
+export AZURE_SCALESET_BASE_IMAGE=Win2016Datacenter
 # Azure Scale Set VM SKU
 export AZURE_SCALESET_VM_SKU=Standard_D4s_v3
 # Azure VM Admin User Name
 export AZURE_SCALESET_VM_USER_NAME=render_user
 export AZURE_SCALESET_VM_USER_PASSWORD=AlgousPass11
-export AZURE_SCALESET_INSTANCE_COUNT=10
+export AZURE_SCALESET_INSTANCE_COUNT=2
 
 # Azure Storage Account name for the metrics collection usage
 export AZURE_SA_NAME=metricsstorage$AZURE_RANDOM_ID
@@ -42,7 +42,7 @@ export AZURE_FUNC_PACKAGE=ScaleDown.zip
 export FUNC_PARAM_LOOKUP_TIME_IN_MINUTES=5
 export FUNC_PARAM_CPU_TRESHOLD=5
 export FUNC_PARAM_TABLE_PREFIX=WADMetricsPT1M
-export FUNC_PARAM_STARTUP_DELAY_IN_MIN=5
+export FUNC_PARAM_STARTUP_DELAY_IN_MIN=30
 export FUNC_PARAM_DISK_TRESHOLD_BYTES=3145728
 
 # Login to start script
@@ -103,18 +103,26 @@ export AZURE_SA_SAS_START_DATE=`date -u -d "-1 year" '+%Y-%m-%dT%H:%M:00Z'`
 # Get SAS token
 export AZURE_SA_SAS_TOKEN=`az storage account generate-sas --permissions acluw --account-name $AZURE_SA_NAME --services bt --resource-types co --expiry $AZURE_SA_SAS_EXPIRY_DATE --start $AZURE_SA_SAS_START_DATE --output tsv`
 
+# Get SA KEY
+export AZURE_SA_KEY=`az storage account keys list -n $AZURE_SA_NAME -g $AZURE_RG_NAME --query [0].value --output tsv`
+
 # Get Scale Set Resource ID
 export AZURE_SCALESET_ID=`az vmss show --resource-group $AZURE_RG_NAME --name $AZURE_SCALESET_NAME --query id --output tsv`
 
 # Cerate storage secret info JSON
-export STORAGE_SECRET="{'storageAccountName': '$AZURE_SA_NAME', 'storageAccountSasToken': '$AZURE_SA_SAS_TOKEN'}"
+#export STORAGE_SECRET="{'storageAccountName': '$AZURE_SA_NAME', 'storageAccountSasToken': '?$AZURE_SA_SAS_TOKEN'}"
+
+export STORAGE_SECRET="{'storageAccountName': '$AZURE_SA_NAME', 'storageAccountKey': '$AZURE_SA_KEY'}"
+
 
 # Get default config for VMSS metrics for testing purposes
-# az vmss diagnostics get-default-config > default_config.json
+az vmss diagnostics get-default-config --is-windows-os > default_config_win.json
 
 export METRICS_FILE_NAME=metrics_config_$AZURE_RANDOM_ID.json
 
-cp metrics_config.json $METRICS_FILE_NAME
+#cp metrics_config.json $METRICS_FILE_NAME
+
+cp default_config_win.json $METRICS_FILE_NAME
 
 # Replace placeholders in metrics config file with actual data
 sed -i "s#__DIAGNOSTIC_STORAGE_ACCOUNT__#$AZURE_SA_NAME#g" $METRICS_FILE_NAME
