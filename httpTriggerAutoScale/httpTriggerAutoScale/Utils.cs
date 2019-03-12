@@ -47,7 +47,7 @@ namespace httpTriggerAutoScale
                         //Check if instances not deallocated before or in dealocatting state
                         if (ins.PowerState != PowerState.Deallocated && ins.PowerState != PowerState.Deallocating)
                         {
-                            TaskList.Add(ins.DeallocateAsync());
+                            TaskList.Add(ins.DeleteAsync());
 
                             dealocatedInstances.Add(ins.ComputerName);
                         }
