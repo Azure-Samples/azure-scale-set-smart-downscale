@@ -253,17 +253,6 @@
         ],
         "scheduledTransferPeriod": "PT1M"
       },
-      "WindowsEventLog": {
-        "DataSource": [
-          {
-            "name": "Application!*[System[(Level=1 or Level=2)]]"
-          },
-          {
-            "name": "System!*[System[(Level=1 or Level=2)]]"
-          }
-        ],
-        "scheduledTransferPeriod": "PT1M"
-      },
       "overallQuotaInMB": 4096
     }
   }
