@@ -21,7 +21,7 @@ export AZURE_SCALESET_LB=smart-scale-set-lb-$AZURE_RANDOM_ID
 # Azure subnet ResourceID
 export AZURE_SCALESET_SUBNET=
 
-# Azure Scale Set VM URN or URI Win2016Datacenter -- UbuntuLTS
+# Azure Scale Set VM URN or URI Win2016Datacenter 
 export AZURE_SCALESET_BASE_IMAGE=Win2016Datacenter
 # Azure Scale Set VM SKU
 export AZURE_SCALESET_VM_SKU=Standard_D4s_v3
@@ -116,7 +116,7 @@ export STORAGE_SECRET="{'storageAccountName': '$AZURE_SA_NAME', 'storageAccountK
 
 
 # Get default config for VMSS metrics for testing purposes
-az vmss diagnostics get-default-config --is-windows-os > default_config_win.json
+#az vmss diagnostics get-default-config --is-windows-os > default_config_win.json
 
 export METRICS_FILE_NAME=metrics_config_$AZURE_RANDOM_ID.json
 
