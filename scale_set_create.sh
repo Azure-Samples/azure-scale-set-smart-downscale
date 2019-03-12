@@ -7,7 +7,7 @@ set -e
 export AZURE_RANDOM_ID=$RANDOM
 
 # Azure Subscription ID to deploy
-export AZURE_SUBSCRIPTION_ID=
+export AZURE_SUBSCRIPTION_ID=613bb8b8-2394-4433-8983-a75f7e20fe3e
 # Azure Resource Group name
 export AZURE_RG_NAME=smart-scale-set-$AZURE_RANDOM_ID-rg
 # Azure DC Location -- assume that FunctionApp consumption plan is availible in this location
@@ -22,6 +22,7 @@ export AZURE_SCALESET_LB=smart-scale-set-lb-$AZURE_RANDOM_ID
 export AZURE_SCALESET_SUBNET=
 
 # Azure Scale Set VM URN or URI
+# export AZURE_SCALESET_BASE_IMAGE=Win2016Datacenter
 export AZURE_SCALESET_BASE_IMAGE=UbuntuLTS
 # Azure Scale Set VM SKU
 export AZURE_SCALESET_VM_SKU=Standard_D4s_v3
@@ -60,7 +61,7 @@ az ad sp create-for-rbac --scopes /subscriptions/$AZURE_SUBSCRIPTION_ID/resource
 
 # Create Azure VM Scale Set -- can be customized according requrements
 # Currently uses just base parameters for PoC
-if [ -z "$AZURE_SCALESET_SUBNET" ]
+if [ -z "$AZURE_SCALESET_SUBNET" ] 
 then
 # $AZURE_SCALESET_SUBNET is empty
 az vmss create -n $AZURE_SCALESET_NAME -g $AZURE_RG_NAME \
@@ -89,8 +90,11 @@ az vmss create -n $AZURE_SCALESET_NAME -g $AZURE_RG_NAME \
 
 fi
 
- export FUNC_PARAM_TIME_OF_CREATION=`date -u '+%Y-%m-%dT%H:%M:00Z'`
- FUNC_PARAM_TIME_OF_CREATION=`echo -n $FUNC_PARAM_TIME_OF_CREATION|base64 --wrap=0`
+# Get OS type for VMSS -- Linux for Linux
+export AZURE_SCALESET_OS_TYPE=`az vmss list-instances -n $AZURE_SCALESET_NAME -g $AZURE_RG_NAME --query [0].storageProfile.osDisk.osType -o tsv`
+
+export FUNC_PARAM_TIME_OF_CREATION=`date -u '+%Y-%m-%dT%H:%M:00Z'`
+FUNC_PARAM_TIME_OF_CREATION=`echo -n $FUNC_PARAM_TIME_OF_CREATION|base64 --wrap=0`
 
 # Create Azure Storage Account
 az storage account create --name $AZURE_SA_NAME --location $AZURE_DC_LOCATION --resource-group $AZURE_RG_NAME --sku Standard_LRS
@@ -106,15 +110,26 @@ export AZURE_SA_SAS_TOKEN=`az storage account generate-sas --permissions acluw -
 # Get Scale Set Resource ID
 export AZURE_SCALESET_ID=`az vmss show --resource-group $AZURE_RG_NAME --name $AZURE_SCALESET_NAME --query id --output tsv`
 
+export METRICS_FILE_NAME=metrics_config_$AZURE_RANDOM_ID.json
+
+if [ "$AZURE_SCALESET_OS_TYPE" = "Linux" ]; then
+
 # Cerate storage secret info JSON
 export STORAGE_SECRET="{'storageAccountName': '$AZURE_SA_NAME', 'storageAccountSasToken': '$AZURE_SA_SAS_TOKEN'}"
 
-# Get default config for VMSS metrics for testing purposes
-# az vmss diagnostics get-default-config > default_config.json
-
-export METRICS_FILE_NAME=metrics_config_$AZURE_RANDOM_ID.json
-
 cp metrics_config.json $METRICS_FILE_NAME
+
+else # Windows
+
+# Get SA KEY
+export AZURE_SA_KEY=`az storage account keys list -n $AZURE_SA_NAME -g $AZURE_RG_NAME --query [0].value --output tsv`
+
+# Cerate storage secret info JSON
+export STORAGE_SECRET="{'storageAccountName': '$AZURE_SA_NAME', 'storageAccountKey': '$AZURE_SA_KEY'}"
+
+cp metrics_config_win.json $METRICS_FILE_NAME
+
+fi
 
 # Replace placeholders in metrics config file with actual data
 sed -i "s#__DIAGNOSTIC_STORAGE_ACCOUNT__#$AZURE_SA_NAME#g" $METRICS_FILE_NAME
