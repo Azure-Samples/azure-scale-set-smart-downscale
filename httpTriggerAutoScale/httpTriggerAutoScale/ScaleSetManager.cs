@@ -11,6 +11,7 @@ using Microsoft.Azure.Management.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.Compute.Fluent;
+using Microsoft.Azure.Management.Compute.Fluent.Models;
 using Microsoft.Azure.Cosmos.Table;
 using System.Text;
 using System.Collections.Generic;
@@ -19,7 +20,7 @@ using System.Globalization;
 
 namespace httpTriggerAutoScale
 {
-    internal class ScaleSetManager  
+    internal class ScaleSetManager
     {
         public ScaleSetManager(string scalesetId, ExecutionContext context, ILogger Log) {
 
@@ -33,6 +34,13 @@ namespace httpTriggerAutoScale
         ILogger log;
         IAzure AzureInstance;
         string scalesetid;
+        OperatingSystemTypes clusterOSType = OperatingSystemTypes.Linux;
+        public OperatingSystemTypes ClusterOSType
+        {
+            get { return clusterOSType; }
+            private set { clusterOSType = value; }
+
+        }
 
         //Default metrics is set to Linux
         string CpuMetricName = "/builtin/processor/percentprocessortime";
@@ -58,12 +66,12 @@ namespace httpTriggerAutoScale
 
             foreach (var ins in instances)
             {
-                if (Instances.Contains(ins.ComputerName))
+                if (Instances.Contains(ClusterOSType == OperatingSystemTypes.Linux ? ins.ComputerName : "_" + ins.Name))
                 {
                     try
                     {
                         //Check if instances not deallocated before or in dealocatting state
-                        if (ins.PowerState != PowerState.Deallocated && ins.PowerState != PowerState.Deallocating)
+                        if (ins.PowerState != PowerState.Deallocated && ins.PowerState != PowerState.Deallocating && ins.PowerState  != PowerState.Starting)
                         {
                             TaskList.Add(ins.DeleteAsync());
 
@@ -95,7 +103,8 @@ namespace httpTriggerAutoScale
                 if (Metrics.Count > 0)
                 {
                     //Calculate average by metric grouped by Host
-                    var groupedResult = Metrics.GroupBy(t => new { Host = t.Host, Metric = t.CounterName })
+                    var groupedResult = Metrics.GroupBy(t => new {
+                                    Host = ClusterOSType == OperatingSystemTypes.Linux ? t.Host : t.RoleInstance, Metric = t.CounterName })
                                    .Select(g => new
                                    {
                                        HostID = g.Key.Host,
@@ -175,9 +184,6 @@ namespace httpTriggerAutoScale
             foreach (var entity in result)
             {
                 resultList.Add(entity);
-
-                //Console.WriteLine("{0}, {1}\t{2}\t{3}", entity.PartitionKey, entity.RowKey,
-                //    entity.Host, entity.Average);
             }
 
             return resultList;
@@ -214,10 +220,11 @@ namespace httpTriggerAutoScale
             var list = scaleset.VirtualMachines.List();
             if (list.Count() > 0)
             {
-                if (list.FirstOrDefault().OSType == Microsoft.Azure.Management.Compute.Fluent.Models.OperatingSystemTypes.Windows)
+                if (list.FirstOrDefault().OSType == OperatingSystemTypes.Windows)
                 {
+                    ClusterOSType = OperatingSystemTypes.Windows;
                     CpuMetricName = CpuMetricNameWindows;
-                    DiskMetricName = CpuMetricNameWindows;
+                    DiskMetricName = DiskMetricNameWindows;
                 }
             }
         }
