@@ -170,5 +170,8 @@ az functionapp config appsettings set --settings $FUNCTION_APP_SETTINGS --name $
 # Add authentication information to FunctionApp Package
 zip -r $AZURE_FUNC_PACKAGE my.azureauth
 
+# check function state before deploy
+az functionapp show --name $AZURE_FUNC_NAME --resource-group $AZURE_RG_NAME
+
 # Deploy FunctionApp Package
 az functionapp deployment source config-zip  --name $AZURE_FUNC_NAME --resource-group $AZURE_RG_NAME  --src $AZURE_FUNC_PACKAGE
