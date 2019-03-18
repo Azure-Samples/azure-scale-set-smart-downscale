@@ -53,7 +53,6 @@ namespace httpTriggerAutoScale
             TimeSpan StartupDelayInMin = TimeSpan.FromMinutes(double.Parse(Environment.GetEnvironmentVariable("StartupDelayInMin")));
             var timeInPast = DateTime.UtcNow.Subtract(StartupDelayInMin);
 
-            //Checking if all params are set and available
             if (String.IsNullOrEmpty(ScaleSetId) || LookupTimeInMinutes <= 0 || CPUTreshold <= 0 || DiskTresholdBytes <= 0 ||
                 String.IsNullOrEmpty(TablePrefix) || String.IsNullOrEmpty(StorageAccountConnectionString) || !parseddate)
             {
@@ -68,13 +67,13 @@ namespace httpTriggerAutoScale
             {
                 log.LogInformation("HTTP trigger function processed a request and will try to adjust scaleset. " + ScaleSetId);
 
-                ScaleSetManager manager = new ScaleSetManager(ScaleSetId, context, log);
+                var azure = Utils.AzureAuth(context);
 
-                var metrics = manager.GetMetricsFromTable(StorageAccountConnectionString, LookupTimeInMinutes, TablePrefix);
+                var metrics = Utils.GetMetricsFromTable(StorageAccountConnectionString, LookupTimeInMinutes, TablePrefix, ScaleSetId);
 
-                var instances = manager.GetInstancesToKill(metrics, CPUTreshold, DiskTresholdBytes);
+                var instances = Utils.GetInstancesToKill(metrics, CPUTreshold, DiskTresholdBytes, log);
 
-                var dealocated = manager.DealocateInstances(instances);
+                var dealocated = Utils.DealocateInstances(instances, ScaleSetId, azure, log);
 
                 logString = $"Done, number of dealocated instances {dealocated.Count.ToString()}: {String.Join(", ", dealocated.ToArray())}";
                 log.LogInformation(logString);

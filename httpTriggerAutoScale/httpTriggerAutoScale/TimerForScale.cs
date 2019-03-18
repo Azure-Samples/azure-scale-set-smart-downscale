@@ -62,15 +62,15 @@ namespace httpTriggerAutoScale
             //Checking is the time right to start scaling, probably initial delay is not come yet
             if (TimeOfCreation.ToUniversalTime() <= timeInPast)
             {
-                ScaleSetManager manager = new ScaleSetManager(ScaleSetId,context,log);
-
                 log.LogInformation("HTTP trigger function processed a request and will try to adjust scaleset. " + ScaleSetId);
-               
-                var metrics = manager.GetMetricsFromTable(StorageAccountConnectionString, LookupTimeInMinutes, TablePrefix);
 
-                var instances = manager.GetInstancesToKill(metrics, CPUTreshold, DiskTresholdBytes);
+                var azure = Utils.AzureAuth(context);
 
-                var dealocated = manager.DealocateInstances(instances);
+                var metrics = Utils.GetMetricsFromTable(StorageAccountConnectionString, LookupTimeInMinutes, TablePrefix, ScaleSetId);
+
+                var instances = Utils.GetInstancesToKill(metrics, CPUTreshold, DiskTresholdBytes, log);
+
+                var dealocated = Utils.DealocateInstances(instances, ScaleSetId, azure, log);
 
                 logString = $"Done, number of dealocated instances {dealocated.Count.ToString()}: {String.Join(", ", dealocated.ToArray())}";
                 log.LogInformation(logString);

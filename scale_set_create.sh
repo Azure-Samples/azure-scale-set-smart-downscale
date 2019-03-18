@@ -45,6 +45,7 @@ export FUNC_PARAM_CPU_TRESHOLD=5
 export FUNC_PARAM_TABLE_PREFIX=WADMetricsPT1M
 export FUNC_PARAM_STARTUP_DELAY_IN_MIN=5
 export FUNC_PARAM_DISK_TRESHOLD_BYTES=3145728
+export FUNC_PARAM_MIN_NODES_NUMBER=1
 
 # Login to start script
 az login
@@ -154,6 +155,7 @@ FUNCTION_APP_SETTINGS=$FUNCTION_APP_SETTINGS"CPUTresholdInPercent=$FUNC_PARAM_CP
 FUNCTION_APP_SETTINGS=$FUNCTION_APP_SETTINGS"TablePrefix=$FUNC_PARAM_TABLE_PREFIX "
 FUNCTION_APP_SETTINGS=$FUNCTION_APP_SETTINGS"DiskTresholdBytes=$FUNC_PARAM_DISK_TRESHOLD_BYTES "
 FUNCTION_APP_SETTINGS=$FUNCTION_APP_SETTINGS"StorageAccountConnectionString=$AZURE_SA_CONNECTION_STRING "
+FUNCTION_APP_SETTINGS=$FUNCTION_APP_SETTINGS"MinNumNodes=$FUNC_PARAM_MIN_NODES_NUMBER "
 FUNCTION_APP_SETTINGS=$FUNCTION_APP_SETTINGS"StartupDelayInMin=$FUNC_PARAM_STARTUP_DELAY_IN_MIN "
 FUNCTION_APP_SETTINGS=$FUNCTION_APP_SETTINGS"TimeOfCreation=$FUNC_PARAM_TIME_OF_CREATION "
 # FunctionApp runtime for netcore app - 2 is required
@@ -169,6 +171,9 @@ az functionapp config appsettings set --settings $FUNCTION_APP_SETTINGS --name $
 
 # Add authentication information to FunctionApp Package
 zip -r $AZURE_FUNC_PACKAGE my.azureauth
+
+# check function state before deploy
+az functionapp show --name $AZURE_FUNC_NAME --resource-group $AZURE_RG_NAME
 
 # Deploy FunctionApp Package
 az functionapp deployment source config-zip  --name $AZURE_FUNC_NAME --resource-group $AZURE_RG_NAME  --src $AZURE_FUNC_PACKAGE
