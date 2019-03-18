@@ -41,6 +41,7 @@ namespace httpTriggerAutoScale
             int LookupTimeInMinutes = int.Parse(Environment.GetEnvironmentVariable("LookupTimeInMin"));
             int CPUTreshold = int.Parse(Environment.GetEnvironmentVariable("CPUTresholdInPercent"));
             int DiskTresholdBytes = int.Parse(Environment.GetEnvironmentVariable("DiskTresholdBytes"));
+            int MinNumNodes = int.Parse(Environment.GetEnvironmentVariable("MinNumNodes"));
             string TablePrefix = Environment.GetEnvironmentVariable("TablePrefix");
             string StorageAccountConnectionString = Environment.GetEnvironmentVariable("StorageAccountConnectionString");
 

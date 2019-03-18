@@ -34,6 +34,7 @@ namespace httpTriggerAutoScale
         ILogger log;
         IAzure AzureInstance;
         string scalesetid;
+       
         OperatingSystemTypes clusterOSType = OperatingSystemTypes.Linux;
         public OperatingSystemTypes ClusterOSType
         {
@@ -52,13 +53,19 @@ namespace httpTriggerAutoScale
         /// <summary>
         /// Dealocating instances in scale-set based on instances list of ids
         /// </summary>
-        internal List<string> DealocateInstances(List<string> Instances)
+        internal List<string> DealocateInstances(List<string> InstancesToKill, int MinNumNodes)
         {
 
             var scaleset = AzureInstance.VirtualMachineScaleSets.GetById(scalesetid);
 
             var instances = scaleset.VirtualMachines.List();
-           
+
+            var diff = instances.Count() - InstancesToKill.Count()
+
+            //if ( diff < MinNumNodes) {
+
+            //    InstancesToKill.RemoveRange(0, )
+            //}
 
             List<string> dealocatedInstances = new List<string>();
 
@@ -66,7 +73,7 @@ namespace httpTriggerAutoScale
 
             foreach (var ins in instances)
             {
-                if (Instances.Contains(ClusterOSType == OperatingSystemTypes.Linux ? ins.ComputerName : "_" + ins.Name))
+                if (InstancesToKill.Contains(ClusterOSType == OperatingSystemTypes.Linux ? ins.ComputerName : "_" + ins.Name))
                 {
                     try
                     {
