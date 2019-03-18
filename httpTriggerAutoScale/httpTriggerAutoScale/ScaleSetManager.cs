@@ -60,12 +60,12 @@ namespace httpTriggerAutoScale
 
             var instances = scaleset.VirtualMachines.List();
 
-            var diff = instances.Count() - InstancesToKill.Count()
-
-            //if ( diff < MinNumNodes) {
-
-            //    InstancesToKill.RemoveRange(0, )
-            //}
+            //make sure we keeping min num nodes in cluster
+            var diff = instances.Count() - InstancesToKill.Count();
+            if (diff < MinNumNodes)
+            {
+                InstancesToKill.RemoveRange(0, MinNumNodes - diff);
+            }
 
             List<string> dealocatedInstances = new List<string>();
 
