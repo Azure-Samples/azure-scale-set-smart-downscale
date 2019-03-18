@@ -7,7 +7,7 @@ set -e
 export AZURE_RANDOM_ID=$RANDOM
 
 # Azure Subscription ID to deploy
-export AZURE_SUBSCRIPTION_ID=
+export AZURE_SUBSCRIPTION_ID=d875d40e-ceb0-453e-ace3-92563e820e6c
 # Azure Resource Group name
 export AZURE_RG_NAME=smart-scale-set-$AZURE_RANDOM_ID-rg
 # Azure DC Location -- assume that FunctionApp consumption plan is availible in this location
@@ -22,10 +22,10 @@ export AZURE_SCALESET_LB=smart-scale-set-lb-$AZURE_RANDOM_ID
 export AZURE_SCALESET_SUBNET=
 
 # Azure Scale Set VM URN or URI
-# export AZURE_SCALESET_BASE_IMAGE=Win2016Datacenter
-export AZURE_SCALESET_BASE_IMAGE=UbuntuLTS
+export AZURE_SCALESET_BASE_IMAGE=Win2016Datacenter
+#export AZURE_SCALESET_BASE_IMAGE=UbuntuLTS
 # Azure Scale Set VM SKU
-export AZURE_SCALESET_VM_SKU=Standard_D4s_v3
+export AZURE_SCALESET_VM_SKU=Standard_B1s
 # Azure VM Admin User Name
 export AZURE_SCALESET_VM_USER_NAME=render_user
 export AZURE_SCALESET_VM_USER_PASSWORD=AlgousPass11
@@ -43,7 +43,7 @@ export AZURE_FUNC_PACKAGE=ScaleDown.zip
 export FUNC_PARAM_LOOKUP_TIME_IN_MINUTES=5
 export FUNC_PARAM_CPU_TRESHOLD=5
 export FUNC_PARAM_TABLE_PREFIX=WADMetricsPT1M
-export FUNC_PARAM_STARTUP_DELAY_IN_MIN=5
+export FUNC_PARAM_STARTUP_DELAY_IN_MIN=0
 export FUNC_PARAM_DISK_TRESHOLD_BYTES=3145728
 export FUNC_PARAM_MIN_NODES_NUMBER=1
 
