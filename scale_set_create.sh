@@ -27,8 +27,8 @@ export AZURE_SCALESET_BASE_IMAGE=Win2016Datacenter
 # Azure Scale Set VM SKU
 export AZURE_SCALESET_VM_SKU=Standard_B1s
 # Azure VM Admin User Name
-export AZURE_SCALESET_VM_USER_NAME=render_user
-export AZURE_SCALESET_VM_USER_PASSWORD=AlgousPass11
+export AZURE_SCALESET_VM_USER_NAME=scale_set_user
+export AZURE_SCALESET_VM_USER_PASSWORD=ScaleSetP@ssword1
 export AZURE_SCALESET_INSTANCE_COUNT=10
 
 # Azure Storage Account name for the metrics collection usage

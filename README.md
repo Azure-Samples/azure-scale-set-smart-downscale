@@ -1,5 +1,5 @@
 # Smart scaling for Azure scale-set with Azure Functions
-Azure Scale-set have a luck of ability to scale down nodes in the right way. Unfortunately, when auto scale rule is triggered the scale-set will kill node with highest node id. In some cases that behavior is not suitable for example when nodes have a state or computing calculation for a long period of time: rendering, hosting game sessions and etc. That become critical in these scenarios because scale set can kill the wrong node that still busy and don’t touch idle nodes. Therefore, that solution can help avoid such situations and help scale down scale set in a right way – killing only idle nodes based on each node metrics.
+Azure Scale Set has a luck of ability to scale down nodes in the right way. Unfortunately, when an auto scale rule is triggered a scale set kills node with highest node id. In some cases this behavior is not suitable, for example, when nodes have a state or computing calculation for a long period of time: rendering, hosting game sessions and etc. It's critical in those scenarios because a scale set can kill a wrong node that still busy and doesn’t touch idle nodes. Therefore, this solution can help avoid such situations and help scale down scale set in a right way – killing only idle nodes based on each node metrics.
 
 ## How it works
 Below you can find the chart of the solution. 
@@ -8,23 +8,23 @@ Below you can find the chart of the solution.
 </p>
 
 Logic steps of workflow:
-1.	Each node in Azure scale set have configured diagnostic extension that sending metrics to Azure Table Storage.
-2.	Azure function triggered on time basis download metrics from corresponded azure table and calculate average numbers for each node and for each metric. 
-3.	If there are nodes that have metric values below the thresholds, then it will kill specific node in scale set.
+1.	Each node in Azure Scale Set has configured diagnostic extension that sending metrics to Azure Table Storage.
+2.	Azure Function are triggered on time basis, downloads metrics from corresponded azure table and calculats average numbers for each node and for each metric. 
+3.	If there are any node that have metric values below the thresholds, then the function kills specific node in the scale set.
 
 ## What in this repository
-1.	**httpTriggerAutoScale** Azure function source code on C# that have timer and http functions. Currently Azure function only monitor two metrics: CPU and Disk, that can be changed in source code.
+1.	**httpTriggerAutoScale** Azure Function C# source code. There are timer and http functions. Currently the function only monitor two metrics: CPU and Disk, it can be changed in source code.
 2.	**metrics_config.json** Azure template for Linux diagnostic extension. You can read more details about that format and usage here.  
 3.	**metrics_config_win.json** Azure template for Windows diagnostic extension. You can read more details about that format and usage here.  
-4.	**scale_set_create.sh** Automation script that will deploy and configure azure services. The script have a list of parameters that covered below. 
+4.	**scale_set_create.sh** Automation script that deploys and configures all needed azure services. The script has a list of parameters that covered below. 
 
-Here is a list of Azure services that will be deployed and fully configured:
-1.	Azure Scale-set
-2.	Azure blob storage
+Here is a list of Azure services to deploy and to fully configure by the script:
+1.	Azure Scale Set
+2.	Azure Storage Account
 3.	Azure Function host and deploy azure function
 
 ## Deployment instruction
-In this repository you can find an automation bash script “scale_set_create.sh” that need to be correctly configured before execution. There is only one param that need to be changed - **AZURE_SUBSCRIPTION_ID** for others parameters values auto-generated using random function or have default values. Here is a detailed description for each parameter that can be changed:
+In this repository you can find an automation bash script “scale_set_create.sh”, it needs to be correctly configured before execution. There is only one param that need to be changed - **AZURE_SUBSCRIPTION_ID** for others parameters values auto-generated using random function or have default values. Here is a detailed description for each parameter that can be changed:
 
 ### Base parameters
   * **AZURE_SUBSCRIPTION_ID** – Azure Subscription ID.
@@ -35,7 +35,7 @@ In this repository you can find an automation bash script “scale_set_create.sh
   * **AZURE_SCALESET_SUBNET** – Optional, you can set network subnetwork resource id where new scale set will be added.
   * **AZURE_SCALESET_BASE_IMAGE** – VM image for scale set, default value is - Win2016Datacenter. For default Linux image use that name – UbuntuLTS
   * **AZURE_SCALESET_VM_SKU**  - VM Size, default value - Standard_B1s
-  * **AZURE_SCALESET_VM_USER_NAME** – Optional, VM admin name, default value - render_user
+  * **AZURE_SCALESET_VM_USER_NAME** – Optional, VM admin name, default value - scale_set_user
   * **AZURE_SCALESET_VM_USER_PASSWORD **– Optional, VM admin password
   * **AZURE_SCALESET_INSTANCE_COUNT** – Number of nodes in new scale set, default value – 10
   * **AZURE_SA_NAME** - Azure Storage Account name for the metrics collection usage, default value autogenerated - metricsstorage$AZURE_RANDOM_ID
@@ -47,7 +47,5 @@ In this repository you can find an automation bash script “scale_set_create.sh
   * **FUNC_PARAM_CPU_TRESHOLD** - CPU threshold in percent. Default value - 5
   * **FUNC_PARAM_STARTUP_DELAY_IN_MIN** - Startup delay for function after it will start monitoring. Default value - 0
   * **FUNC_PARAM_DISK_TRESHOLD_BYTES** – Disk threshold in bytes per second for all disks. corresponded metric name for Linux –“/builtin/disk/bytespersecond” and for Windows – “\PhysicalDisk(_Total)\Disk Read Bytes/sec”  Default value - 3145728
-  * **FUNC_PARAM_MIN_NODES_NUMBER** - Minimum number of nodes for cluster. Default value -1
-  * **FUNC_PARAM_TABLE_PREFIX** – Table metrics name. Default value - WADMetricsPT1M
-
-
+  * **FUNC_PARAM_MIN_NODES_NUMBER** - Minimum number of nodes for cluster. Default value -- 1
+  * **FUNC_PARAM_TABLE_PREFIX** – Table metrics prefix. Default value - WADMetricsPT1M
