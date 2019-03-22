@@ -18,10 +18,11 @@ Logic steps of workflow:
 3.	**metrics_config_win.json** Azure template for Windows diagnostic extension. You can read more details about that format and usage here.  
 4.	**scale_set_create.sh** Automation script that deploys and configures all needed azure services. The script has a list of parameters that covered below. 
 
-Here is a list of Azure services to deploy and to fully configure by the script:
+Here is a list of Azure services and entities to deploy and to fully configure by the script:
 1.	Azure Scale Set
 2.	Azure Storage Account
-3.	Azure Function host and deploy azure function
+3.  Azure Service Principal for the Azure Function with rights for the resources group with the Scale Set 
+4.	Azure Function host and deploy azure function
 
 ## Deployment instruction
 In this repository you can find an automation bash script “scale_set_create.sh”, it needs to be correctly configured before execution. There is only one param that need to be changed - **AZURE_SUBSCRIPTION_ID** for others parameters values auto-generated using random function or have default values. Here is a detailed description for each parameter that can be changed:
