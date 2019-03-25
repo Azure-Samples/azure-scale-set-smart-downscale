@@ -3,6 +3,7 @@ Azure Scale Set has luck of ability to scale down nodes in the right way. Unfort
 
 ## How it works
 Below you can find the chart of the solution. 
+
 <p align="center">
 <img src="img/arch.png" width="400">
 </p>
