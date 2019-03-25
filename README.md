@@ -2,8 +2,7 @@
 Azure Scale Set has luck of ability to scale down nodes in the right way. Unfortunately, when an auto scale rule is triggered a scale set kills node with the highest node id. In some cases this behavior is not suitable, for example, when nodes have a state or computing calculation for a long period of time: rendering, hosting game sessions and etc. It's critical in those scenarios because a scale set can kill a wrong node that still busy and doesn’t touch idle nodes. Therefore, this solution can help avoid such situations and help scale down scale set in the right way – killing only idle nodes based on each node metrics.
 
 ## How it works
-Below you can find the chart of the solution. 
-
+Below you can find the chart of the solution.
 <p align="center">
 <img src="img/arch.png" width="400">
 </p>
