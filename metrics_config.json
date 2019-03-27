@@ -1,0 +1,129 @@
+{
+    "StorageAccount": "__DIAGNOSTIC_STORAGE_ACCOUNT__",
+    "ladCfg": {
+      "diagnosticMonitorConfiguration": {
+        "eventVolume": "Medium",
+        "metrics": {
+          "metricAggregation": [
+            {
+              "scheduledTransferPeriod": "PT1M"
+            }
+          ],
+          "resourceId": "__VM_OR_VMSS_RESOURCE_ID__"
+        },
+        "performanceCounters": {
+          "performanceCounterConfiguration": [
+            {
+              "annotation": [
+                {
+                  "displayName": "Disk write guest OS",
+                  "locale": "en-us"
+                }
+              ],
+              "class": "disk",
+              "condition": "IsAggregate=TRUE",
+              "counter": "writebytespersecond",
+              "counterSpecifier": "/builtin/disk/writebytespersecond",
+              "type": "builtin",
+              "unit": "BytesPerSecond"
+            },
+            {
+              "annotation": [
+                {
+                  "displayName": "Disk total bytes",
+                  "locale": "en-us"
+                }
+              ],
+              "class": "disk",
+              "condition": "IsAggregate=TRUE",
+              "counter": "bytespersecond",
+              "counterSpecifier": "/builtin/disk/bytespersecond",
+              "type": "builtin",
+              "unit": "BytesPerSecond"
+            },
+            {
+              "annotation": [
+                {
+                  "displayName": "Filesystem bytes/sec",
+                  "locale": "en-us"
+                }
+              ],
+              "class": "filesystem",
+              "condition": "IsAggregate=TRUE",
+              "counter": "bytespersecond",
+              "counterSpecifier": "/builtin/filesystem/bytespersecond",
+              "type": "builtin",
+              "unit": "BytesPerSecond"
+            },
+            {
+              "annotation": [
+                {
+                  "displayName": "CPU percentage guest OS",
+                  "locale": "en-us"
+                }
+              ],
+              "class": "processor",
+              "condition": "IsAggregate=TRUE",
+              "counter": "percentprocessortime",
+              "counterSpecifier": "/builtin/processor/percentprocessortime",
+              "type": "builtin",
+              "unit": "Percent"
+            },
+            {
+              "annotation": [
+                {
+                  "displayName": "Memory available",
+                  "locale": "en-us"
+                }
+              ],
+              "class": "memory",
+              "counter": "availablememory",
+              "counterSpecifier": "/builtin/memory/availablememory",
+              "type": "builtin",
+              "unit": "Bytes"
+            },
+            {
+              "annotation": [
+                {
+                  "displayName": "Memory used",
+                  "locale": "en-us"
+                }
+              ],
+              "class": "memory",
+              "counter": "usedmemory",
+              "counterSpecifier": "/builtin/memory/usedmemory",
+              "type": "builtin",
+              "unit": "Bytes"
+            },
+            {
+              "annotation": [
+                {
+                  "displayName": "Mem. percent available",
+                  "locale": "en-us"
+                }
+              ],
+              "class": "memory",
+              "counter": "percentavailablememory",
+              "counterSpecifier": "/builtin/memory/percentavailablememory",
+              "type": "builtin",
+              "unit": "Percent"
+            },
+            {
+              "annotation": [
+                {
+                  "displayName": "Memory percentage",
+                  "locale": "en-us"
+                }
+              ],
+              "class": "memory",
+              "counter": "percentusedmemory",
+              "counterSpecifier": "/builtin/memory/percentusedmemory",
+              "type": "builtin",
+              "unit": "Percent"
+            },
+          ]
+        },
+      },
+      "sampleRateInSeconds": 15
+    }
+}
