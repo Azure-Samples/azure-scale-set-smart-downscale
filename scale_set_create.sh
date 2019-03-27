@@ -65,7 +65,7 @@ az ad sp create-for-rbac --scopes /subscriptions/$AZURE_SUBSCRIPTION_ID/resource
 if [ -z "$AZURE_SCALESET_SUBNET" ] 
 then
 # $AZURE_SCALESET_SUBNET is empty
-az vmss create -n $AZURE_SCALESET_NAME -g $AZURE_RG_NAME \
+    az vmss create -n $AZURE_SCALESET_NAME -g $AZURE_RG_NAME \
             --image $AZURE_SCALESET_BASE_IMAGE \
             --vm-sku $AZURE_SCALESET_VM_SKU \
             --load-balancer $AZURE_SCALESET_LB \
@@ -77,7 +77,7 @@ az vmss create -n $AZURE_SCALESET_NAME -g $AZURE_RG_NAME \
             --priority Low
 else
 # $AZURE_SCALESET_SUBNET is set
-az vmss create -n $AZURE_SCALESET_NAME -g $AZURE_RG_NAME \
+    az vmss create -n $AZURE_SCALESET_NAME -g $AZURE_RG_NAME \
             --subnet $AZURE_SCALESET_SUBNET \
             --image $AZURE_SCALESET_BASE_IMAGE \
             --vm-sku $AZURE_SCALESET_VM_SKU \
@@ -114,22 +114,20 @@ export AZURE_SCALESET_ID=`az vmss show --resource-group $AZURE_RG_NAME --name $A
 export METRICS_FILE_NAME=metrics_config_$AZURE_RANDOM_ID.json
 
 if [ "$AZURE_SCALESET_OS_TYPE" = "Linux" ]; then
+    # Linux
+    # Create storage secret info JSON
+    export STORAGE_SECRET="{'storageAccountName': '$AZURE_SA_NAME', 'storageAccountSasToken': '$AZURE_SA_SAS_TOKEN'}"
 
-# Cerate storage secret info JSON
-export STORAGE_SECRET="{'storageAccountName': '$AZURE_SA_NAME', 'storageAccountSasToken': '$AZURE_SA_SAS_TOKEN'}"
+    cp metrics_config.json $METRICS_FILE_NAME
+else 
+    # Windows
+    # Get SA KEY
+    export AZURE_SA_KEY=`az storage account keys list -n $AZURE_SA_NAME -g $AZURE_RG_NAME --query [0].value --output tsv`
 
-cp metrics_config.json $METRICS_FILE_NAME
+    # Cerate storage secret info JSON
+    export STORAGE_SECRET="{'storageAccountName': '$AZURE_SA_NAME', 'storageAccountKey': '$AZURE_SA_KEY'}"
 
-else # Windows
-
-# Get SA KEY
-export AZURE_SA_KEY=`az storage account keys list -n $AZURE_SA_NAME -g $AZURE_RG_NAME --query [0].value --output tsv`
-
-# Cerate storage secret info JSON
-export STORAGE_SECRET="{'storageAccountName': '$AZURE_SA_NAME', 'storageAccountKey': '$AZURE_SA_KEY'}"
-
-cp metrics_config_win.json $METRICS_FILE_NAME
-
+    cp metrics_config_win.json $METRICS_FILE_NAME
 fi
 
 # Replace placeholders in metrics config file with actual data
