@@ -7,7 +7,7 @@ set -e
 export AZURE_RANDOM_ID=$RANDOM
 
 # Azure Subscription ID to deploy
-export AZURE_SUBSCRIPTION_ID=d875d40e-ceb0-453e-ace3-92563e820e6c
+export AZURE_SUBSCRIPTION_ID=
 # Azure Resource Group name
 export AZURE_RG_NAME=smart-scale-set-$AZURE_RANDOM_ID-rg
 # Azure DC Location -- assume that FunctionApp consumption plan is availible in this location
