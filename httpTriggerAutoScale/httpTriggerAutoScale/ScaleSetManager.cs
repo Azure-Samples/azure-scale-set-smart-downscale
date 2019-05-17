@@ -34,7 +34,7 @@ namespace httpTriggerAutoScale
         ILogger log;
         IAzure AzureInstance;
         string scalesetid;
-       
+
         OperatingSystemTypes clusterOSType = OperatingSystemTypes.Linux;
         public OperatingSystemTypes ClusterOSType
         {
@@ -78,7 +78,7 @@ namespace httpTriggerAutoScale
                     try
                     {
                         //Check if instances not deallocated before or in dealocatting state
-                        if (ins.PowerState != PowerState.Deallocated && ins.PowerState != PowerState.Deallocating && ins.PowerState  != PowerState.Starting)
+                        if (ins.PowerState != PowerState.Deallocated && ins.PowerState != PowerState.Deallocating && ins.PowerState != PowerState.Starting)
                         {
                             TaskList.Add(ins.DeleteAsync());
 
@@ -103,7 +103,7 @@ namespace httpTriggerAutoScale
         /// </summary>
         internal List<string> GetInstancesToKill(List<WadMetric> Metrics, int CPUTreshold, int DiskTreshold)
         {
-            List<string> instances = new List<string>(); 
+            List<string> instances = new List<string>();
 
             if (Metrics != null)
             {
@@ -111,7 +111,7 @@ namespace httpTriggerAutoScale
                 {
                     //Calculate average by metric grouped by Host
                     var groupedResult = Metrics.GroupBy(t => new {
-                                    Host = ClusterOSType == OperatingSystemTypes.Linux ? t.Host : t.RoleInstance, Metric = t.CounterName })
+                        Host = ClusterOSType == OperatingSystemTypes.Linux ? t.Host : t.RoleInstance, Metric = t.CounterName })
                                    .Select(g => new
                                    {
                                        HostID = g.Key.Host,
@@ -157,7 +157,7 @@ namespace httpTriggerAutoScale
             CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
 
             CloudTable table = tableClient.ListTables(TablePrefix).Last();
-            
+
 
             if (table == null)
             {
@@ -212,6 +212,28 @@ namespace httpTriggerAutoScale
                 .WithDefaultSubscription();
 
             return azure;
+        }
+
+        /// <summary>
+        /// Clearing ScaleSet from stopped VMS, that can happen if there is no available cores and in other situations.
+        /// </summary>
+        /// <returns>Number of deleted stooped VMs</returns>
+        internal int ClearStoppedVMs() {
+
+            int deleted = 0;
+            var scaleset = AzureInstance.VirtualMachineScaleSets.GetById(scalesetid);
+            var instances = scaleset.VirtualMachines.List();
+
+            List<Task> TaskList = new List<Task>();
+            var stopped = instances.Where(x => x.PowerState == PowerState.Stopped || x.PowerState == PowerState.Deallocated);
+            foreach (var instance in stopped) {
+                TaskList.Add(instance.DeleteAsync());
+                deleted++;
+            }
+
+            Task.WaitAll(TaskList.ToArray());
+
+            return deleted;
         }
 
         /// <summary>
