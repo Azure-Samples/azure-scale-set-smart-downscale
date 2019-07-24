@@ -1,3 +1,15 @@
+---
+page_type: sample
+languages:
+  - csharp
+  - azurecli
+products:
+  - azure
+  - azure-functions
+  - azure-storage
+  - azure-virtual-machines
+---
+
 # Smart scaling for Azure Scale Set with Azure Functions
 
 **_Notice_**: _This sample code is provided for conceptual demo purposes only and not intended for direct production use._
