@@ -8,6 +8,7 @@ products:
   - azure-functions
   - azure-storage
   - azure-virtual-machines
+description: "This solution can help scale down the scale set the right way – killing only idle nodes based on each node metrics."
 ---
 
 # Smart scaling for Azure Scale Set with Azure Functions
