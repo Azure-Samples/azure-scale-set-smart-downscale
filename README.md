@@ -32,8 +32,8 @@ Logic steps of workflow:
 ## What in this repository
 
 1.	**httpTriggerAutoScale** Azure Function C# source code. There are timer and HTTP functions. Currently, the function only monitors two metrics: CPU and Disk, it can be changed in the source code.
-2.	**metrics_config.json** Azure template for [Azure Linux Diagnostic Extension](https://docs.microsoft.com/en-us/azure/virtual-machines/extensions/diagnostics-linux). You can find more details about that format and usage [here](https://docs.microsoft.com/ru-ru/azure/azure-monitor/platform/diagnostics-extension-schema).  
-3.	**metrics_config_win.json** Azure template for [Azure Windows Diagnostic Extension](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/extensions-diagnostics). You can find more details about that format and usage [here](https://docs.microsoft.com/ru-ru/azure/azure-monitor/platform/diagnostics-extension-schema).  
+2.	**metrics_config.json** Azure template for [Azure Linux Diagnostic Extension](https://docs.microsoft.com/azure/virtual-machines/extensions/diagnostics-linux). You can find more details about that format and usage [here](https://docs.microsoft.com/azure/azure-monitor/platform/diagnostics-extension-schema).  
+3.	**metrics_config_win.json** Azure template for [Azure Windows Diagnostic Extension](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/extensions-diagnostics). You can find more details about that format and usage [here](https://docs.microsoft.com/azure/azure-monitor/platform/diagnostics-extension-schema).  
 4.	**scale_set_create.sh** Automation script that deploys and configures all needed azure services. The script has a list of parameters that covered below. 
 
 **Here is a list of Azure services and entities to deploy and to fully configure by the script**:
