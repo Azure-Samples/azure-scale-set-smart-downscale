@@ -1,13 +1,13 @@
 ---
 page_type: sample
 languages:
-  - csharp
-  - azurecli
+- csharp
+- azurecli
 products:
-  - azure
-  - azure-functions
-  - azure-storage
-  - azure-virtual-machines
+- azure
+- azure-functions
+- azure-storage
+- azure-virtual-machines
 description: "This solution can help scale down the scale set the right way – killing only idle nodes based on each node metrics."
 ---
 
