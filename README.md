@@ -20,9 +20,9 @@ Azure Scale Set has a lack of ability to scale down nodes in the right way. Unfo
 ## How it works
 
 Below you can find the chart of the solution. 
-<p align="center">
-<img src="img/arch.png" width="400">
-</p>
+
+![](img/arch.png)
+
 
 Logic steps of workflow:
 1.	Each node in the Azure Scale Set has configured diagnostic extension that sending metrics to Azure Table Storage.
