@@ -1,21 +1,8 @@
-using System;
-using System.IO;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using Microsoft.Azure.Management.Fluent;
-using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
-using Microsoft.Azure.Management.ResourceManager.Fluent;
-using Microsoft.Azure.Management.Compute.Fluent;
-using Microsoft.Azure.Cosmos.Table;
-using System.Text;
-using System.Collections.Generic;
-using System.Linq;
+using System;
 using System.Globalization;
+using System.Text;
 
 namespace httpTriggerAutoScale
 {
