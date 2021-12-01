@@ -1,22 +1,15 @@
-﻿using System;
-using System.IO;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using Microsoft.Azure.Management.Fluent;
-using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
-using Microsoft.Azure.Management.ResourceManager.Fluent;
+﻿using Azure.Data.Tables;
 using Microsoft.Azure.Management.Compute.Fluent;
 using Microsoft.Azure.Management.Compute.Fluent.Models;
-using Microsoft.Azure.Cosmos.Table;
-using System.Text;
+using Microsoft.Azure.Management.Fluent;
+using Microsoft.Azure.Management.ResourceManager.Fluent;
+using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
+using Microsoft.Azure.WebJobs;
+using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Globalization;
+using System.Threading.Tasks;
 
 namespace httpTriggerAutoScale
 {
@@ -153,11 +146,8 @@ namespace httpTriggerAutoScale
 
             List<WadMetric> resultList = new List<WadMetric>();
 
-            CloudStorageAccount storageAccount = CloudStorageAccount.Parse(StorageAccountConnectionString);
-            CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
-
-            CloudTable table = tableClient.ListTables(TablePrefix).Last();
-
+            var serviceClient = new TableServiceClient(StorageAccountConnectionString);
+            var table = serviceClient.GetTableClient(TablePrefix);
 
             if (table == null)
             {
@@ -172,21 +162,11 @@ namespace httpTriggerAutoScale
             var timeInPast = DateTime.UtcNow.Subtract(minutesBack);
             DateTimeOffset qdate = new DateTimeOffset(timeInPast);
 
-            //TODO add ROWKEY to encrease performance.
-            TableQuery<WadMetric> rangeQuery = new TableQuery<WadMetric>().Where(
-                TableQuery.CombineFilters(
-                    TableQuery.CombineFilters(
-                        TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, scalesetid.Replace("/", ":002F").Replace("-", ":002D").Replace(".", ":002E")),
-                        TableOperators.And,
-                        TableQuery.GenerateFilterConditionForDate("TIMESTAMP", QueryComparisons.GreaterThanOrEqual, qdate)),
-                    TableOperators.And,
-                    TableQuery.CombineFilters(
-                        TableQuery.GenerateFilterCondition("CounterName", QueryComparisons.Equal, CpuMetricName),
-                        TableOperators.Or,
-                        TableQuery.GenerateFilterCondition("CounterName", QueryComparisons.Equal, DiskMetricName)
-                    )));
 
-            var result = table.ExecuteQuery(rangeQuery);
+
+            //TODO add ROWKEY to encrease performance.
+            var result = table.Query<WadMetric>(wad => wad.PartitionKey == scalesetid.Replace("/", ":002F").Replace("-", ":002D").Replace(".", ":002E") &&
+                wad.Timestamp >= qdate && (wad.CounterName == CpuMetricName || wad.CounterName == DiskMetricName));
 
             foreach (var entity in result)
             {
@@ -204,8 +184,7 @@ namespace httpTriggerAutoScale
 
             var path = System.IO.Path.Combine(context.FunctionAppDirectory, "my.azureauth");
             var credentials = SdkContext.AzureCredentialsFactory.FromFile(path);
-
-            var azure = Azure
+            var azure = Microsoft.Azure.Management.Fluent.Azure
                 .Configure()
                 .WithLogLevel(HttpLoggingDelegatingHandler.Level.Basic)
                 .Authenticate(credentials)
