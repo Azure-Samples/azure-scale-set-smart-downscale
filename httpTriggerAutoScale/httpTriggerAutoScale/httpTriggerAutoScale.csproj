@@ -7,7 +7,7 @@
     <Compile Remove="Utils.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Azure.Data.Tables" Version="12.0.0-beta.6" />
+    <PackageReference Include="Azure.Data.Tables" Version="12.3.0" />
     <PackageReference Include="Microsoft.Azure.Management.Compute.Fluent" Version="1.19.0" />
     <PackageReference Include="Microsoft.Azure.Management.Fluent" Version="1.19.0" />
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="1.0.24" />
